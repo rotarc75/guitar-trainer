@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo 3 : Le Chromatique</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --gold: #f59e0b;
+            --secondary: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.8); /* Plus sombre pour aller avec le thème */
+            --text-main: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* NAVIGATION */
+        .nav-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        /* Toggle Switch pour la Descente */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #64748b;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Consigne */
+        .instruction {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 800;
+            margin: 20px 0;
+            height: 30px;
+            animation: pulseText 2s infinite;
+        }
+
+        @keyframes pulseText {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; text-shadow: 0 0 15px rgba(139, 92, 246, 0.4); }
+            100% { opacity: 0.8; }
+        }
+
+        /* --- MANCHE --- */
+        .fretboard-wrapper {
+            position: relative;
+            background: #18181b;
+            padding: 10px 40px 10px 60px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+            margin: 20px 0;
+            border: 4px solid #3f3f46;
+        }
+
+        .string-names {
+            position: absolute; left: 5px; top: 0; bottom: 0;
+            display: flex; flex-direction: column; justify-content: space-around;
+            font-weight: bold; color: #94a3b8; font-size: 0.8rem; padding: 10px 0;
+            width: 45px; text-align: right;
+        }
+
+        .fretboard { display: grid; grid-template-columns: 50px repeat(12, 1fr); position: relative; height: 220px; user-select: none; }
+        .fret-line { border-right: 3px solid #a1a1aa; position: relative; z-index: 1; }
+        .nut { background-color: #fce7f3; border-right: 6px solid #e5e7eb; }
+
+        .string { position: absolute; left: 0; right: 0; background: linear-gradient(to bottom, #d4d4d8, #71717a); z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+        /* Vue TABLATURE (e aigu en haut) */
+        .str-0 { top: 15%; height: 1.5px; } /* e */
+        .str-1 { top: 29%; height: 2px; }   /* B */
+        .str-2 { top: 43%; height: 2.5px; } /* G */
+        .str-3 { top: 57%; height: 3.5px; } /* D */
+        .str-4 { top: 71%; height: 4px; }   /* A */
+        .str-5 { top: 85%; height: 5px; }   /* E grave */
+
+        .marker { position: absolute; width: 18px; height: 18px; background: radial-gradient(circle, #fff 0%, #cbd5e1 100%); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; }
+        .marker-double { height: 50px; width: 18px; border-radius: 10px; }
+
+        .target-dot {
+            position: absolute; width: 34px; height: 34px;
+            background: radial-gradient(circle at 30% 30%, #f87171, #dc2626);
+            border: 3px solid white; border-radius: 50%; z-index: 20;
+            box-shadow: 0 0 20px var(--danger);
+            transform: translate(-50%, -50%); display: none;
+            transition: all 0.2s;
+
+            /* Pour afficher le nom de la note dedans */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9rem;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* --- CLAVIER --- */
+        .keyboard { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-top: 25px; }
+        .key-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 15px 5px; border-radius: 12px;
+            font-size: 1rem; font-weight: 700; color: white;
+            cursor: pointer; transition: all 0.1s;
+        }
+        .key-btn:hover { border-color: var(--primary); background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+        .key-btn:active { transform: scale(0.95); }
+        .key-btn.correct { background: var(--success); color: white; border-color: var(--success); }
+        .key-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); opacity: 0.6; }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            color: white; border: none; padding: 15px 50px; font-size: 1.2rem; border-radius: 50px;
+            cursor: pointer; font-weight: 800; box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
+            transition: transform 0.2s; margin-top: 30px;
+        }
+        .start-btn:hover { transform: scale(1.05); }
+
+        #progressDisplay {
+            color: #94a3b8;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_manche.html" class="nav-btn">
+        ← Retour
+    </a>
+
+    <div class="container">
+
+        <div class="header-controls">
+            <span id="progressDisplay">0 / 0</span>
+
+            <div class="toggle-container">
+                <span style="font-size:0.9rem; color:#cbd5e1;">Mode Descente (4→0)</span>
+                <label class="switch">
+                    <input type="checkbox" id="descentToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="instruction" id="instructionText">Dites la note à haute voix !</div>
+
+        <div class="fretboard-wrapper">
+            <div class="string-names">
+                <span>e</span><span>Si</span><span>Sol</span><span>Ré</span><span>La</span><span>Mi</span>
+            </div>
+            <div class="fretboard" id="fretboard"></div>
+
+            <div class="target-dot" id="targetDot"></div>
+
+            <div class="string str-0"></div>
+            <div class="string str-1"></div>
+            <div class="string str-2"></div>
+            <div class="string str-3"></div>
+            <div class="string str-4"></div>
+            <div class="string str-5"></div>
+        </div>
+
+        <div class="keyboard" id="keyboard"></div>
+
+        <button class="start-btn" id="startBtn" onclick="startGame()">COMMENCER L'EXERCICE</button>
+
+    </div>
+
+<script>
+    // --- DATA ---
+    const openStringsNotes = [4, 11, 7, 2, 9, 4]; // e B G D A E
+    const noteNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+
+    // --- STATE ---
+    let sequence = [];
+    let currentStep = 0;
+    let isPlaying = false;
+    let currentNoteIndex = -1;
+    let isDescentMode = false;
+
+    // DOM
+    const fretboard = document.getElementById('fretboard');
+    const targetDot = document.getElementById('targetDot');
+    const keyboard = document.getElementById('keyboard');
+    const startBtn = document.getElementById('startBtn');
+    const instructionText = document.getElementById('instructionText');
+    const progressEl = document.getElementById('progressDisplay');
+    const descentToggle = document.getElementById('descentToggle');
+
+    function init() {
+        buildFretboard();
+        buildKeyboard();
+        descentToggle.addEventListener('change', (e) => {
+            isDescentMode = e.target.checked;
+            if(!isPlaying) {
+                // Si on n'est pas en jeu, on peut mettre à jour un message
+            } else {
+                // Si on est en jeu, on redémarre pour appliquer le changement
+                startGame();
+            }
+        });
+    }
+
+    function generateSequence() {
+        sequence = [];
+        // Ordre des cordes : Mi Grave (5) -> La (4) -> Ré (3) -> Sol (2) -> Si (1) -> Mi Aigu (0)
+        const stringOrder = [5, 4, 3, 2, 1, 0];
+
+        stringOrder.forEach(stringIdx => {
+            // Règle : Jusqu'à 4, sauf pour Sol (idx 2) où on s'arrête à 3
+            let maxFret = (stringIdx === 2) ? 3 : 4;
+
+            if (isDescentMode) {
+                // Descente : de maxFret vers 0
+                for(let f=maxFret; f >= 0; f--) {
+                    sequence.push({ string: stringIdx, fret: f });
+                }
+            } else {
+                // Montée : de 0 vers maxFret
+                for(let f=0; f <= maxFret; f++) {
+                    sequence.push({ string: stringIdx, fret: f });
+                }
+            }
+        });
+    }
+
+    function buildFretboard() {
+        for(let i=0; i<=12; i++) {
+            let div = document.createElement('div');
+            div.className = i === 0 ? 'nut' : 'fret-line';
+            if ([3,5,7,9].includes(i)) {
+                let m = document.createElement('div');
+                m.className = 'marker';
+                div.appendChild(m);
+            }
+            if (i === 12) {
+                let m = document.createElement('div');
+                m.className = 'marker marker-double';
+                div.appendChild(m);
+            }
+            fretboard.appendChild(div);
+        }
+    }
+
+    function buildKeyboard() {
+        noteNames.forEach((note, index) => {
+            let btn = document.createElement('div');
+            btn.className = 'key-btn';
+            btn.textContent = note;
+            btn.onclick = () => checkAnswer(index, btn);
+            keyboard.appendChild(btn);
+        });
+    }
+
+    function startGame() {
+        generateSequence(); // Génère selon le mode choisi
+        isPlaying = true;
+        currentStep = 0;
+        startBtn.style.display = 'none';
+        resetButtons();
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        if (currentStep >= sequence.length) {
+            endGame();
+            return;
+        }
+
+        // Récupérer l'étape actuelle
+        let step = sequence[currentStep];
+
+        // Calculer la réponse attendue
+        currentNoteIndex = (openStringsNotes[step.string] + step.fret) % 12;
+
+        // Affichage
+        placeDot(step.string, step.fret);
+
+        // Mise à jour progression
+        progressEl.textContent = `${currentStep + 1} / ${sequence.length}`;
+
+        // Consigne
+        instructionText.textContent = "Dites la note à haute voix !";
+        instructionText.style.color = "var(--primary)";
+
+        // Réactiver boutons
+        document.querySelectorAll('.key-btn').forEach(b => b.style.pointerEvents = 'auto');
+    }
+
+    function placeDot(stringIdx, fretIdx) {
+        const stringTops = [15, 29, 43, 57, 71, 85];
+        let topPos = stringTops[stringIdx] + "%";
+        // Approx placement
+        let leftPercent = 6.5 + ((fretIdx - 1) * 7.8) + (7.8 / 2);
+
+        if (fretIdx === 0) leftPercent = 2; // Corde à vide
+
+        targetDot.textContent = ""; // On vide le texte
+        targetDot.style.display = 'flex'; // On affiche le rond rouge
+        targetDot.style.top = topPos;
+        targetDot.style.left = leftPercent + "%";
+    }
+
+    function checkAnswer(noteIdx, btn) {
+        if(!isPlaying) return;
+
+        if (noteIdx === currentNoteIndex) {
+            // BRAVO
+            btn.classList.add('correct');
+            instructionText.textContent = "Correct !";
+            instructionText.style.color = "var(--success)";
+
+            // AFFICHER LE NOM SUR LE POINT
+            targetDot.textContent = noteNames[currentNoteIndex];
+
+            // Bloquer les clics pendant la pause
+            document.querySelectorAll('.key-btn').forEach(b => b.style.pointerEvents = 'none');
+
+            setTimeout(() => {
+                resetButtons();
+                currentStep++;
+                nextQuestion();
+            }, 1000); // Petite pause pour voir la note sur le manche
+        } else {
+            // RATÉ
+            btn.classList.add('wrong');
+            instructionText.textContent = "Non, essayez encore...";
+            instructionText.style.color = "var(--danger)";
+        }
+    }
+
+    function resetButtons() {
+        document.querySelectorAll('.key-btn').forEach(b => {
+            b.classList.remove('correct', 'wrong');
+        });
+    }
+
+    function endGame() {
+        isPlaying = false;
+        targetDot.style.display = 'none';
+        instructionText.textContent = "Série terminée ! Bien joué.";
+        startBtn.textContent = "RECOMMENCER";
+        startBtn.style.display = 'inline-block';
+    }
+
+    init();
+
+</script>
+</body>
+</html>

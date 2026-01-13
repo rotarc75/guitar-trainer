@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guitare Theory - Accueil</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #1e293b;
+            --accent: #f59e0b;
+            --bg-dark: #0f172a;
+            --text-main: #f1f5f9;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.2rem;
+        }
+
+        /* GRILLE DES MODULES */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .module-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .module-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 3rem;
+            opacity: 0.1;
+        }
+
+        .module-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .module-desc {
+            color: #cbd5e1;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* SECTION ACTIONS */
+        .action-group {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            margin-top: auto; /* Pousse les boutons vers le bas */
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centré pour le menu principal */
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        /* Style bouton "Cours" */
+        .btn-theory {
+            background: rgba(255,255,255,0.05);
+            color: #e2e8f0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-theory:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Style bouton "Pratique" */
+        .btn-practice {
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            border: none;
+        }
+        .btn-practice:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        .btn-locked {
+            background: rgba(0,0,0,0.2);
+            color: #64748b;
+            cursor: not-allowed;
+            border: 1px solid transparent;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Guitare Training</h1>
+        <div class="subtitle">Maîtrisez le manche, comprenez la musique.</div>
+    </header>
+
+    <div class="modules-grid">
+
+        <div class="module-card">
+            <div class="module-badge">📚</div>
+            <div class="module-title">
+                <span>Bibliothèque de Cours</span>
+            </div>
+            <p class="module-desc">
+                Accédez à l'ensemble des modules théoriques. Apprenez le solfège rythmique, la lecture de notes, l'harmonie et la construction des accords.
+            </p>
+            <div class="action-group">
+                <a href="section_cours.html" class="btn btn-theory">
+                    <span>Accéder aux cours</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-badge">🎸</div>
+            <div class="module-title">
+                <span>Connaître son Manche</span>
+            </div>
+            <p class="module-desc">
+                Entrainez-vous et maitrisez votre manche !
+            </p>
+            <div class="action-group">
+                <a href="section_manche.html" class="btn btn-practice">
+                    <span>Lancer l'entraînement</span>
+                </a>
+            </div>
+        </div>
+
+
+
+        <div class="module-card">
+            <div class="module-badge">🛠️</div>
+            <div class="module-title">
+                <span style="color:#94a3b8">Boîte à Outils</span>
+            </div>
+            <p class="module-desc">
+                Métronome, accordeur, dictionnaire d'accords et générateur de gammes. (Bientôt disponible)
+            </p>
+            <div class="action-group">
+                <a href="section_outils.html" class="btn btn-practice">
+                    <span>Acceder aux outils</span>
+                </a>
+                <!-- <div class="btn btn-locked">🚧 En développement</div> -->
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-badge">🎹</div>
+            <div class="module-title">
+                <span>Intervalles & Accords</span>
+            </div>
+            <p class="module-desc">
+                La théorie appliquée : Maîtrisez les intervalles (tierces, quintes...) pour construire vos accords.
+            </p>
+            <div class="action-group">
+                <a href="section_intervalles_accords.html" class="btn btn-practice">
+                    <span>Ouvrir la section</span>
+                </a>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+</body>
+</html>

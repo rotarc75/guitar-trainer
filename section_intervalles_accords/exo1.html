@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo 2 : Tons & Demi-tons</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --secondary: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text-main: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+        }
+
+        .nav-btn {
+            position: absolute; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px; border-radius: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center; max-width: 700px; width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* HEADER */
+        .score-display {
+            font-size: 1.1rem; color: #94a3b8; font-weight: 700; margin-bottom: 20px;
+            display: flex; justify-content: space-between;
+        }
+        .streak { color: var(--primary-light); }
+
+        /* QUESTION BOX */
+        .question-box {
+            background: rgba(0,0,0,0.2);
+            padding: 30px; border-radius: 20px;
+            margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);
+            position: relative; overflow: hidden;
+        }
+
+        .interval-label {
+            font-size: 1.2rem; font-weight: 300; color: #cbd5e1; margin-bottom: 5px; display: block;
+        }
+
+        .calc-row {
+            display: flex; justify-content: center; align-items: center; gap: 20px;
+            margin-top: 15px;
+        }
+
+        .root-note {
+            color: white; font-size: 3.5rem; font-weight: 900;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        .operator {
+            font-size: 2rem; font-weight: bold;
+            color: var(--primary-light);
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px; border-radius: 15px;
+        }
+
+        /* REPONSES */
+        .answers-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+        }
+        @media (max-width: 500px) { .answers-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .note-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 0; border-radius: 12px; color: white; font-weight: 700; font-size: 1.1rem;
+            cursor: pointer; transition: all 0.1s;
+        }
+        .note-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); border-color: var(--primary); }
+        .note-btn:active { transform: scale(0.95); }
+
+        .note-btn.correct { background: var(--success) !important; border-color: var(--success); box-shadow: 0 0 15px var(--success); }
+        .note-btn.wrong { background: var(--danger) !important; border-color: var(--danger); opacity: 0.5; }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
+
+    <div class="container">
+
+        <div class="score-display">
+            <span>Score: <span id="scoreVal">0</span></span>
+            <span class="streak">Série: <span id="streakVal">0</span></span>
+        </div>
+
+        <div class="question-box">
+            <span class="interval-label">Trouve la note située...</span>
+
+            <div class="calc-row">
+                <span class="root-note" id="rootNote">Do</span>
+                <span class="operator" id="operatorDisplay">+ 1 Ton</span>
+            </div>
+        </div>
+
+        <div class="answers-grid" id="answersGrid">
+            </div>
+
+    </div>
+
+<script>
+    const noteNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+
+    // Définition des mouvements basiques
+    // name = Texte affiché
+    // semitones = Décalage en demi-tons
+    const movements = [
+        { name: "+ 1/2 Ton", semitones: 1 },
+        { name: "+ 1 Ton", semitones: 2 },
+        { name: "+ 1,5 Ton", semitones: 3 },
+        { name: "+ 2 Tons", semitones: 4 },
+        { name: "- 1/2 Ton", semitones: -1 },
+        { name: "- 1 Ton", semitones: -2 },
+        { name: "- 1,5 Ton", semitones: -3 }
+    ];
+
+    // État du jeu
+    let currentRootIndex = 0;
+    let currentMove = null;
+    let score = 0;
+    let streak = 0;
+    let isProcessing = false;
+
+    // DOM
+    const rootNote = document.getElementById('rootNote');
+    const operatorDisplay = document.getElementById('operatorDisplay');
+    const answersGrid = document.getElementById('answersGrid');
+    const scoreVal = document.getElementById('scoreVal');
+    const streakVal = document.getElementById('streakVal');
+
+    function init() {
+        nextQuestion();
+    }
+
+    function generateGrid() {
+        answersGrid.innerHTML = '';
+        let shuffled = noteNames.map((name, i) => ({ name: name, originalIndex: i }));
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        shuffled.forEach(item => {
+            let btn = document.createElement('div');
+            btn.className = 'note-btn';
+            btn.textContent = item.name;
+            btn.onclick = () => checkAnswer(item.originalIndex, btn);
+            answersGrid.appendChild(btn);
+        });
+    }
+
+    function nextQuestion() {
+        isProcessing = false;
+        generateGrid();
+        currentRootIndex = Math.floor(Math.random() * 12);
+        currentMove = movements[Math.floor(Math.random() * movements.length)];
+        rootNote.textContent = noteNames[currentRootIndex];
+        operatorDisplay.textContent = currentMove.name;
+        if(currentMove.semitones > 0) {
+            operatorDisplay.style.color = "#a78bfa";
+            operatorDisplay.style.borderColor = "#a78bfa";
+        } else {
+            operatorDisplay.style.color = "#f472b6";
+            operatorDisplay.style.borderColor = "#f472b6";
+        }
+    }
+
+    function checkAnswer(clickedIndex, btnElement) {
+        if(isProcessing) return;
+        isProcessing = true;
+
+        // CALCUL DE LA REPONSE
+        let correctIndex = (currentRootIndex + currentMove.semitones + 12) % 12;
+
+        if(clickedIndex === correctIndex) {
+            btnElement.classList.add('correct');
+            score++;
+            streak++;
+            updateScore();
+            setTimeout(nextQuestion, 500);
+        } else {
+            btnElement.classList.add('wrong');
+            streak = 0;
+            updateScore();
+
+            let correctName = noteNames[correctIndex];
+
+            // On cherche le bouton qui contient ce texte
+            let allBtns = document.querySelectorAll('.note-btn');
+            allBtns.forEach(btn => {
+                if(btn.textContent === correctName) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            setTimeout(nextQuestion, 2000);
+        }
+    }
+
+    function updateScore() {
+        scoreVal.textContent = score;
+        streakVal.textContent = streak;
+    }
+
+    init();
+
+</script>
+</body>
+</html>

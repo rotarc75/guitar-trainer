@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo 2 : Lecture du Manche Ultimate</title>
+    <style>
+    :root {
+        --primary: #8b5cf6;
+        --primary-light: #a78bfa;
+        --success: #10b981;
+        --danger: #ef4444;
+        --gold: #f59e0b;
+        --secondary: #1e293b;
+        --card-bg: rgba(30, 41, 59, 0.9);
+        --text-main: #f1f5f9;
+    }
+
+    body {
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        background:
+            radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+            radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+        background-color: #0f172a;
+        background-attachment: fixed;
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+    }
+
+    /* NAVIGATION */
+    .nav-btn {
+        position: absolute; top: 25px;
+        text-decoration: none; color: rgba(255, 255, 255, 0.8);
+        font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;
+        padding: 8px 15px; background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+        backdrop-filter: blur(5px); transition: all 0.2s ease; z-index: 100;
+        border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+    }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+    .back-link { left: 25px; }
+    .quit-btn { right: 25px; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.3); display: none; }
+    .quit-btn:hover { background: rgba(239, 68, 68, 0.5); }
+
+    .container {
+        background: var(--card-bg);
+        padding: 40px; border-radius: 30px; backdrop-filter: blur(20px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        text-align: center; max-width: 900px; width: 100%;
+        position: relative; overflow: hidden; animation: fadeIn 0.5s ease-out;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .header-info { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 700; color: #94a3b8; }
+    .record-badge { font-size: 0.85rem; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 12px; color: #cbd5e1; }
+    .score-live { font-size: 2rem; color: var(--primary); font-weight: 900; margin-bottom: 10px; }
+
+    /* MANCHE */
+    .fretboard-wrapper {
+        position: relative; background: #18181b; padding: 10px 40px 10px 60px;
+        border-radius: 15px; box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        margin: 20px 0; border: 4px solid #3f3f46;
+    }
+    .string-names {
+        position: absolute; left: 5px; top: 0; bottom: 0;
+        display: flex; flex-direction: column; justify-content: space-around;
+        font-weight: bold; color: #94a3b8; font-size: 0.8rem; padding: 10px 0; width: 45px; text-align: right;
+    }
+    .fretboard { display: grid; grid-template-columns: 50px repeat(12, 1fr); position: relative; height: 220px; user-select: none; }
+    .fret-line { border-right: 3px solid #a1a1aa; position: relative; z-index: 1; }
+    .nut { background-color: #fce7f3; border-right: 6px solid #e5e7eb; }
+    .string { position: absolute; left: 0; right: 0; background: linear-gradient(to bottom, #d4d4d8, #71717a); z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    .str-0 { top: 15%; height: 1.5px; } .str-1 { top: 29%; height: 2px; } .str-2 { top: 43%; height: 2.5px; }
+    .str-3 { top: 57%; height: 3.5px; } .str-4 { top: 71%; height: 4px; } .str-5 { top: 85%; height: 5px; }
+    .marker { position: absolute; width: 18px; height: 18px; background: radial-gradient(circle, #fff 0%, #cbd5e1 100%); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; }
+    .marker-double { height: 50px; width: 18px; border-radius: 10px; }
+
+    .target-dot {
+        position: absolute; width: 30px; height: 30px; background: radial-gradient(circle at 30% 30%, #f87171, #dc2626);
+        border: 3px solid white; border-radius: 50%; z-index: 20; box-shadow: 0 0 20px var(--danger);
+        transform: translate(-50%, -50%); display: none; transition: all 0.2s;
+    }
+    .target-dot.pop { animation: popIn 0.3s forwards; }
+    @keyframes popIn { 0% { transform: translate(-50%, -50%) scale(0); } 100% { transform: translate(-50%, -50%) scale(1); } }
+
+    /* CLAVIER */
+    .keyboard { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-top: 25px; }
+    .key-btn {
+        background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); padding: 15px 5px; border-radius: 12px;
+        font-size: 1rem; font-weight: 800; color: white; cursor: pointer; transition: all 0.1s;
+    }
+    .key-btn:hover { border-color: var(--primary); transform: translateY(-2px); background: rgba(139, 92, 246, 0.1); }
+    .key-btn:active { transform: scale(0.95); }
+    .key-btn.correct { background: var(--success); color: white; border-color: var(--success); }
+    .key-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); opacity: 0.6; }
+    .key-btn.disabled { opacity: 0.3; pointer-events: none; background: rgba(0,0,0,0.2); border-color: transparent;}
+
+    /* CONFIGURATION SCREEN (Dark Mode) */
+    .overlay-screen {
+        position: absolute; top:0; left:0; right:0; bottom:0;
+        background: rgba(15, 23, 42, 0.98); /* FOND SOMBRE */
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        z-index: 50; backdrop-filter: blur(10px); padding: 20px;
+        color: white;
+    }
+    .hidden { display: none !important; }
+
+    .config-box {
+        background: rgba(30, 41, 59, 0.6); /* BOITE SOMBRE */
+        padding: 20px; border-radius: 20px; width: 90%; max-width: 600px;
+        margin-bottom: 20px; text-align: left;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .config-row { margin-bottom: 20px; }
+    .config-label { font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase;}
+
+    /* CHIPS & SWITCHES (Dark Mode) */
+    .string-selector { display: flex; gap: 5px; flex-wrap: wrap; }
+    .string-chip {
+        padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        cursor: pointer; font-weight: bold; font-size: 0.85rem; color: #cbd5e1; transition: all 0.2s;
+    }
+    .string-chip:hover { border-color: var(--primary); color: white; }
+    .string-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .mode-switch { display:flex; gap:10px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+    .mode-opt { flex:1; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 700; color:#94a3b8; text-align: center; font-size: 0.9rem;}
+    .mode-opt.active { background: var(--primary); color: white; }
+
+    .btn-main {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white; border: none; padding: 18px 50px; font-size: 1.2rem; border-radius: 50px;
+        cursor: pointer; font-weight: 800; box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
+        transition: transform 0.2s;
+    }
+    .btn-main:hover { transform: translateY(-3px); }
+
+    .progress-bar-container { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow:hidden; width: 100%; margin-top: auto;}
+    .progress-bar { height: 100%; background: var(--gold); width: 100%; }
+
+    /* Switch toggle */
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; float: right;}
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* ÉCRAN DE FIN & HISTORIQUE */
+    .end-content { text-align: center; width: 100%; max-width: 500px; }
+    .final-score { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 10px 0; text-shadow: 0 0 30px rgba(139, 92, 246, 0.4); }
+
+    .mistakes-box {
+        background: rgba(0,0,0,0.3); border-radius: 15px; padding: 15px;
+        margin: 20px 0; max-height: 200px; overflow-y: auto;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .history-item {
+        display: flex; justify-content: space-between; padding: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-item.nok { color: #f87171; }
+    .history-item.ok { color: #4ade80; }
+
+    .record-msg {
+        color: var(--gold); font-weight: 800; font-size: 1.2rem;
+        margin-bottom: 15px; display: none; animation: pulse 1s infinite;
+    }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+</style>
+
+</head>
+<body>
+
+   <a href="../section_manche.html" class="nav-btn back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Menu
+    </a>
+
+    <div class="nav-btn quit-btn" id="quitBtn" onclick="quitGame()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        Quitter
+    </div>
+
+    <div class="container">
+
+        <div class="header-info">
+            <span id="roundDisplay">1 / 10</span>
+            <span id="bestScore" class="record-badge">Record: 0</span>
+        </div>
+        <div class="score-live" id="scoreDisplay">0</div>
+
+        <div class="fretboard-wrapper">
+            <div class="string-names">
+                <span>e</span><span>Si</span><span>Sol</span><span>Ré</span><span>La</span><span>Mi</span>
+            </div>
+            <div class="fretboard" id="fretboard"></div>
+            <div class="target-dot" id="targetDot"></div>
+            <div class="string str-0"></div>
+            <div class="string str-1"></div>
+            <div class="string str-2"></div>
+            <div class="string str-3"></div>
+            <div class="string str-4"></div>
+            <div class="string str-5"></div>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="keyboard" id="keyboard"></div>
+
+        <div class="overlay-screen" id="startScreen">
+            <h1 style="color:white; margin-bottom:5px">Configuration</h1>
+            <p style="margin-bottom:20px; color:#cbd5e1; font-size:0.9rem">Personnalise ta séance d'entraînement</p>
+
+            <div class="config-box">
+                <div class="config-row">
+                    <span class="config-label">Mode de jeu</span>
+                    <div class="mode-switch">
+                        <div class="mode-opt active" onclick="selectMode('session')" id="btnSession">Session</div>
+                        <div class="mode-opt" onclick="selectMode('survival')" id="btnSurvival">☠️ Survie</div>
+                        <div class="mode-opt" onclick="selectMode('training')" id="btnTraining">Entraînement</div>
+                    </div>
+                </div>
+
+                <div class="config-row">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+                        <span class="config-label" style="margin:0">Cordes cibles</span>
+                        <div style="display:flex; align-items:center; gap:8px">
+                            <span style="font-size:0.8rem; font-weight:bold; color:#cbd5e1">Naturelles Uniq.</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="naturalOnlyToggle" onchange="toggleNaturals()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="string-selector">
+                        <div class="string-chip active" onclick="setFilterString('all', this)">Toutes</div>
+                        <div class="string-chip" onclick="setFilterString(5, this)">Mi (E)</div>
+                        <div class="string-chip" onclick="setFilterString(4, this)">La (A)</div>
+                        <div class="string-chip" onclick="setFilterString(3, this)">Ré (D)</div>
+                        <div class="string-chip" onclick="setFilterString(2, this)">Sol (G)</div>
+                        <div class="string-chip" onclick="setFilterString(1, this)">Si (B)</div>
+                        <div class="string-chip" onclick="setFilterString(0, this)">Mi (e)</div>
+                    </div>
+                </div>
+
+                <div class="config-row" id="diffControl">
+                    <label style="font-weight:700; color:#cbd5e1; display:flex; justify-content:space-between; font-size:0.9rem">
+                        <span id="sliderLabel">Temps de réflexion</span>
+                        <span id="speedVal" style="color:var(--primary)">3s</span>
+                    </label>
+                    <input type="range" style="width:100%; margin-top:10px" min="0" max="10" step="0.5" value="3" oninput="updateSpeed(this.value)">
+                </div>
+
+                <div class="config-row" id="trainingDurationControl" style="display:none">
+                    <label style="font-weight:700; color:#cbd5e1; display:flex; justify-content:space-between; font-size:0.9rem">
+                        <span>Durée de la séance</span>
+                        <span id="trainDurVal" style="color:var(--primary)">2 min</span>
+                    </label>
+                    <input type="range" style="width:100%; margin-top:10px" min="0" max="10" step="1" value="2" oninput="updateTrainingDuration(this.value)">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8; margin-top:5px">
+                        <span>0 (Infini)</span>
+                        <span>10 min</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="btn-main" onclick="startGame()">COMMENCER</button>
+        </div>
+
+        <div class="overlay-screen hidden" id="endScreen">
+            <div class="end-content">
+                <h1 id="endTitle" style="margin:0; font-size:1.5rem;">Terminé !</h1>
+
+                <div class="final-score" id="finalScore">0</div>
+                <div class="record-msg" id="recordMsg">🏆 NOUVEAU RECORD !</div>
+
+                <div class="mistakes-box" id="mistakeReview">
+                    </div>
+
+                <div style="display:flex; gap:15px; justify-content:center; margin-top:20px;">
+                    <button class="btn-main" onclick="resetGameUI()" style="padding:15px 30px; font-size:1rem;">Rejouer</button>
+                    <button class="btn-main" onclick="location.href='../section_manche.html'" style="background:transparent; border:1px solid rgba(255,255,255,0.2); padding:15px 30px; font-size:1rem;">Menu</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+    // --- DATA ---
+    // MODIFICATION : Tableau inversé pour correspondre à la vue Tablature (0 = e aigu en haut, 5 = E grave en bas)
+    const openStringsNotes = [4, 11, 7, 2, 9, 4]; // e B G D A E
+    const noteNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+
+    // --- STATE ---
+    let mode = 'session';
+    let speedDuration = 3000; // Temps pour répondre à UNE question
+    let trainingMaxTime = 120000; // 2 minutes par défaut
+    let isInfiniteTraining = false;
+
+    let score = 0;
+    let round = 0;
+    let maxRounds = 10;
+    let isPlaying = false;
+    let currentNoteIndex = -1;
+    let timerId = null; // Timer question
+    let trainingTimerId = null; // Timer global entrainement
+    let startTime = 0;
+    let trainingStartTime = 0;
+    let history = [];
+    let recordKey = 'guitar_exo2_record';
+
+    // Filtres
+    let filterString = 'all';
+    let filterNaturals = false;
+
+    // DOM
+    const fretboard = document.getElementById('fretboard');
+    const targetDot = document.getElementById('targetDot');
+    const keyboard = document.getElementById('keyboard');
+    const progressBar = document.getElementById('progressBar');
+    const startScreen = document.getElementById('startScreen');
+    const endScreen = document.getElementById('endScreen');
+    const quitBtn = document.getElementById('quitBtn');
+    const roundDisplay = document.getElementById('roundDisplay');
+
+    function init() {
+        // Construction du manche
+        for(let i=0; i<=12; i++) {
+            let div = document.createElement('div');
+            div.className = i === 0 ? 'nut' : 'fret-line';
+            if ([3,5,7,9].includes(i)) {
+                let m = document.createElement('div');
+                m.className = 'marker';
+                div.appendChild(m);
+            }
+            if (i === 12) {
+                let m = document.createElement('div');
+                m.className = 'marker marker-double';
+                div.appendChild(m);
+            }
+            fretboard.appendChild(div);
+        }
+        // Clavier
+        noteNames.forEach((note, index) => {
+            let btn = document.createElement('div');
+            btn.className = 'key-btn';
+            btn.textContent = note;
+            btn.onclick = () => checkAnswer(index, btn);
+            keyboard.appendChild(btn);
+        });
+
+        loadRecords();
+    }
+
+    // --- CONFIG & FILTRES ---
+    window.setFilterString = function(val, elem) {
+        // Conversion explicite en nombre si ce n'est pas 'all'
+        filterString = val === 'all' ? 'all' : Number(val);
+
+        document.querySelectorAll('.string-chip').forEach(c => c.classList.remove('active'));
+        elem.classList.add('active');
+
+        loadRecords();
+    }
+
+    window.toggleNaturals = function() {
+        filterNaturals = document.getElementById('naturalOnlyToggle').checked;
+        updateKeyboardUI();
+    }
+
+    function updateKeyboardUI() {
+        const btns = document.querySelectorAll('.key-btn');
+        btns.forEach((btn, idx) => {
+            if (filterNaturals && noteNames[idx].includes('#')) {
+                btn.classList.add('disabled');
+            } else {
+                btn.classList.remove('disabled');
+            }
+        });
+    }
+
+    function updateSpeed(val) {
+        // MODIFICATION : Gestion de l'infini (0)
+        if (parseFloat(val) === 0) {
+             document.getElementById('speedVal').textContent = "Illimité";
+             speedDuration = 0; // 0 signalera l'infini
+        } else {
+            document.getElementById('speedVal').textContent = val + "s";
+            speedDuration = val * 1000;
+        }
+    }
+
+    function updateTrainingDuration(val) {
+        // MODIFICATION : Gestion de l'infini via le slider
+        if (parseInt(val) === 0) {
+            setInfiniteDuration();
+        } else {
+            isInfiniteTraining = false;
+            trainingMaxTime = val * 60 * 1000;
+            document.getElementById('trainDurVal').textContent = val + " min";
+        }
+    }
+
+    function setInfiniteDuration() {
+        isInfiniteTraining = true;
+        document.getElementById('trainDurVal').textContent = "Infini";
+    }
+
+    function selectMode(m) {
+        mode = m;
+        document.querySelectorAll('.mode-opt').forEach(el => el.classList.remove('active'));
+
+        let btnId = m === 'session' ? 'btnSession' : (m === 'survival' ? 'btnSurvival' : 'btnTraining');
+        document.getElementById(btnId).classList.add('active');
+
+        // Gestion UI selon mode
+        const diffCtrl = document.getElementById('diffControl');
+        const trainCtrl = document.getElementById('trainingDurationControl');
+        const sliderLabel = document.getElementById('sliderLabel');
+
+        if(mode === 'survival') {
+            diffCtrl.style.display = 'none'; // Vitesse fixe
+            trainCtrl.style.display = 'none';
+            speedDuration = 2000;
+        } else if (mode === 'training') {
+            diffCtrl.style.display = 'block';
+            trainCtrl.style.display = 'block';
+            sliderLabel.textContent = "Temps de réponse (Vitesse)";
+        } else { // Session
+            diffCtrl.style.display = 'block';
+            trainCtrl.style.display = 'none';
+            sliderLabel.textContent = "Temps de réflexion";
+        }
+
+        loadRecords();
+    }
+
+    function loadRecords() {
+        let key = `${recordKey}_${mode}_${filterString}`;
+        let rec = localStorage.getItem(key) || 0;
+        document.getElementById('bestScore').textContent = "Record: " + rec;
+    }
+
+    // --- JEU ---
+
+    function startGame() {
+        startScreen.classList.add('hidden');
+        quitBtn.style.display = 'flex';
+
+        score = 0;
+        round = 0;
+        isPlaying = true;
+        history = [];
+        document.getElementById('scoreDisplay').textContent = "0";
+        updateKeyboardUI();
+
+        if (mode === 'training') {
+            trainingStartTime = performance.now();
+            startTrainingGlobalTimer();
+        }
+
+        nextQuestion();
+    }
+
+    function quitGame() {
+        isPlaying = false;
+        cancelAnimationFrame(timerId);
+        cancelAnimationFrame(trainingTimerId);
+        resetGameUI();
+    }
+
+    function resetGameUI() {
+        endScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+        quitBtn.style.display = 'none';
+        targetDot.style.display = 'none';
+        progressBar.style.width = '0%';
+        resetButtons();
+        loadRecords();
+    }
+
+    function startTrainingGlobalTimer() {
+        function checkGlobalTime() {
+            if(!isPlaying) return;
+            if(isInfiniteTraining) {
+                // Juste afficher le temps écoulé si on veut, ou rien.
+                // Ici on laisse tourner.
+                roundDisplay.textContent = "Mode Infini";
+            } else {
+                let elapsed = performance.now() - trainingStartTime;
+                let remaining = Math.max(0, trainingMaxTime - elapsed);
+
+                // Formatage mm:ss
+                let sec = Math.ceil(remaining / 1000);
+                let min = Math.floor(sec / 60);
+                sec = sec % 60;
+                roundDisplay.textContent = `Temps : ${min}:${sec < 10 ? '0'+sec : sec}`;
+
+                if (remaining <= 0) {
+                    gameOver();
+                    return;
+                }
+            }
+            trainingTimerId = requestAnimationFrame(checkGlobalTime);
+        }
+        trainingTimerId = requestAnimationFrame(checkGlobalTime);
+    }
+
+    function nextQuestion() {
+        if(!isPlaying) return;
+
+        // Gestion des tours (Session / Survie)
+        if(mode === 'session') {
+            if(round >= maxRounds) {
+                gameOver();
+                return;
+            }
+            round++;
+            roundDisplay.textContent = `${round} / ${maxRounds}`;
+        }
+        else if (mode === 'survival') {
+            round++;
+            roundDisplay.textContent = `Série : ${round}`;
+        }
+
+        // --- CHOIX NOTE ---
+        let string, fret, noteIdx;
+        let valid = false;
+
+        while(!valid) {
+            // Choix corde
+            if (filterString === 'all') {
+                string = Math.floor(Math.random() * 6);
+            } else {
+                string = filterString;
+            }
+
+            // Génère un chiffre entre 1 et 12
+            // (0 est exclu, donc pas de corde à vide)
+            fret = Math.floor(Math.random() * 12) + 1;
+
+            noteIdx = (openStringsNotes[string] + fret) % 12;
+
+            // Filtre Notes Naturelles si activé
+            if (filterNaturals) {
+                if (!noteNames[noteIdx].includes('#')) valid = true;
+            } else {
+                valid = true;
+            }
+        }
+
+        currentNoteIndex = noteIdx;
+        placeDot(string, fret);
+        resetButtons();
+        startQuestionTimer();
+    }
+
+    function placeDot(stringIdx, fretIdx) {
+        const stringTops = [15, 29, 43, 57, 71, 85];
+        let topPos = stringTops[stringIdx] + "%";
+
+        targetDot.style.left = `calc(110px + ((100% - 150px) / 12) * (${fretIdx} - 0.5))`;
+
+        // Animation et Affichage
+        targetDot.classList.remove('pop');
+        void targetDot.offsetWidth; // Reset anim
+        targetDot.classList.add('pop');
+
+        targetDot.style.display = 'block';
+        targetDot.style.top = topPos;
+    }
+
+    function startQuestionTimer() {
+        startTime = performance.now();
+        progressBar.style.width = "100%";
+
+        // MODIFICATION : Si la vitesse est 0 (infini), on ne lance pas le décompte
+        if (speedDuration === 0) {
+            return;
+        }
+
+        function loop() {
+            if(!isPlaying) return;
+            let elapsed = performance.now() - startTime;
+            let pct = Math.max(0, 100 - (elapsed / speedDuration) * 100);
+
+            // En mode entrainement, la barre de temps est juste visuelle (rythme),
+            // si elle arrive à 0 on passe juste à la suivante sans Game Over (sauf si on veut compter les fautes)
+            progressBar.style.width = pct + "%";
+
+            if(elapsed >= speedDuration) {
+                timeOut();
+            } else {
+                timerId = requestAnimationFrame(loop);
+            }
+        }
+        cancelAnimationFrame(timerId);
+        timerId = requestAnimationFrame(loop);
+    }
+
+    function checkAnswer(noteIdx, btnElement) {
+        if(!isPlaying) return;
+        if(btnElement.classList.contains('disabled')) return;
+
+        cancelAnimationFrame(timerId);
+
+        if(noteIdx === currentNoteIndex) {
+            // BONNE REPONSE
+            let pts = (mode === 'session' ? 100 : 1);
+            if(mode === 'training') pts = 1;
+
+            score += pts;
+            document.getElementById('scoreDisplay').textContent = score;
+            btnElement.classList.add('correct');
+            setTimeout(nextQuestion, 400);
+        } else {
+            // MAUVAISE REPONSE
+            btnElement.classList.add('wrong');
+            let allBtns = document.querySelectorAll('.key-btn');
+            allBtns[currentNoteIndex].classList.add('correct');
+
+            if (mode !== 'training') {
+                history.push({note: noteNames[currentNoteIndex], ok: false, reason: "Erreur"});
+            }
+
+            if(mode === 'survival') {
+                setTimeout(gameOver, 1000);
+            } else {
+                // En training ou session, on continue
+                setTimeout(nextQuestion, 1200);
+            }
+        }
+    }
+
+    function timeOut() {
+        if(!isPlaying) return;
+
+        // En training, timeout n'est pas grave, on passe juste
+        if (mode === 'training') {
+            // On montre la réponse et on passe
+            let allBtns = document.querySelectorAll('.key-btn');
+            allBtns[currentNoteIndex].classList.add('correct');
+            setTimeout(nextQuestion, 1000);
+            return;
+        }
+
+        // Session ou Survie
+        isPlaying = false;
+        history.push({note: noteNames[currentNoteIndex], ok: false, reason: "Trop lent"});
+
+        let allBtns = document.querySelectorAll('.key-btn');
+        allBtns[currentNoteIndex].classList.add('wrong');
+
+        if(mode === 'survival') {
+            setTimeout(gameOver, 1000);
+        } else {
+            isPlaying = true;
+            setTimeout(nextQuestion, 1500);
+        }
+    }
+
+    function resetButtons() {
+        let btns = document.querySelectorAll('.key-btn');
+        btns.forEach(b => {
+            b.classList.remove('correct', 'wrong');
+        });
+        updateKeyboardUI();
+    }
+
+    function gameOver() {
+        isPlaying = false;
+        cancelAnimationFrame(timerId);
+        cancelAnimationFrame(trainingTimerId);
+
+        endScreen.classList.remove('hidden');
+        quitBtn.style.display = 'none';
+
+        document.getElementById('finalScore').textContent = score;
+        document.getElementById('endTitle').textContent = mode === 'survival' ? 'Game Over' : 'Session Terminée';
+
+        // Save Record
+        let key = `${recordKey}_${mode}_${filterString}`;
+        let oldRec = parseInt(localStorage.getItem(key)) || 0;
+
+        // On ne sauvegarde pas le record en mode training infini
+        if(score > oldRec && !(mode==='training' && isInfiniteTraining)) {
+            localStorage.setItem(key, score);
+            document.getElementById('recordMsg').style.display = 'block';
+            // On met à jour l'affichage du haut immédiatement
+            document.getElementById('bestScore').textContent = "Record: " + score;
+        } else {
+            document.getElementById('recordMsg').style.display = 'none';
+        }
+
+        // Recap Erreurs
+        let div = document.getElementById('mistakeReview');
+        div.innerHTML = "";
+        if (mode === 'training') {
+             div.innerHTML = "<div class='history-item ok' style='justify-content:center'>Entraînement terminé !</div>";
+        } else {
+            if(history.length > 0) {
+                history.forEach(h => {
+                    let d = document.createElement('div');
+                    d.className = 'history-item nok';
+                    d.innerHTML = `<span>C'était un ${h.note}</span> <span>${h.reason}</span>`;
+                    div.appendChild(d);
+                });
+            } else {
+                div.innerHTML = "<div class='history-item ok' style='justify-content:center'>Parfait ! Aucune erreur.</div>";
+            }
+        }
+    }
+
+    init();
+
+</script>
+</body>
+</html>

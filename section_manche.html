@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connaître son manche</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #1e293b;
+            --accent: #f59e0b;
+            --bg-dark: #0f172a;
+            --text-main: #f1f5f9;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeIn 1s ease-out;
+            position: relative;
+        }
+
+        /* Bouton retour discret en haut à gauche */
+        .nav-back {
+            position: absolute;
+            left: 0;
+            top: 10px;
+            text-decoration: none;
+            color: #94a3b8;
+            font-weight: 600;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .nav-back:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block; /* Pour centrer le titre */
+        }
+
+        /* GRILLE DES MODULES */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .module-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .module-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 3rem;
+            opacity: 0.1;
+        }
+
+        .module-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .module-desc {
+            color: #cbd5e1;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* GROUPE ACTION (Pousse le bouton en bas) */
+        .action-group {
+            margin-top: auto;
+        }
+
+        /* BOUTON (Style "Pratique" de index.html : Rectangle arrondi avec dégradé) */
+        .btn-practice {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%; /* Pleine largeur */
+            padding: 15px 0; /* Hauteur comme sur index */
+            border-radius: 10px; /* Coins arrondis légers (pas pilule) */
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+            box-sizing: border-box;
+
+            /* Le dégradé du bouton "Lancer l'entraînement" */
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            border: none;
+        }
+
+        .btn-practice:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        /* Badge NOUVEAU (Style discret en haut à droite) */
+        .badge-new {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #10b981; /* Vert */
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="index.html" class="nav-back">← Retour</a>
+        <h1>Connaître son manche</h1>
+    </header>
+
+    <div class="modules-grid">
+
+        <div class="module-card">
+            <div class="module-badge">🪜</div>
+            <div class="module-title">
+                <span>Le Chromatique</span>
+            </div>
+            <p class="module-desc">
+                L'exercice fondamental. Remontez le manche corde par corde (0, 1, 2, 3, 4) pour mémoriser l'ordre des notes.
+            </p>
+            <div class="action-group">
+                <a href="section_manche/exo3.html" class="btn btn-practice">
+                    <span>Lancer l'entraînement</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-badge">🎸</div>
+            <div class="module-title">
+                <span>Chasse aux Notes</span>
+            </div>
+            <p class="module-desc">
+                Le grand classique pour débuter. Prenez le temps de repérer les notes sur le manche à votre rythme, sans chrono imposé.
+            </p>
+            <div class="action-group">
+                <a href="section_manche/exo1.html" class="btn btn-practice">
+                    <span>Lancer l'entraînement</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <span class="badge-new">Nouveau</span>
+            <div class="module-title">
+                Lecture du Manche 👁️
+            </div>
+            <p class="module-desc">
+                Une pastille s'affiche sur le manche : identifiez la note correspondante. Idéal pour travailler vos réflexes et la lecture instantanée.
+            </p>
+            <div class="action-group">
+                <a href="section_manche/exo2.html" class="btn-practice">
+                    Lancer l'exercice
+                </a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-badge">🎯</div>
+            <div class="module-title">
+                <span>Explorateur</span>
+            </div>
+            <p class="module-desc">
+                On vous donne une note, trouvez TOUTES ses positions sur le manche.
+            </p>
+            <div class="action-group">
+                <a href="section_manche/exo4.html" class="btn btn-practice">
+                    <span>Lancer l'entraînement</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-badge">🧩</div>
+            <div class="module-title">
+                <span>Le Puzzle</span>
+            </div>
+            <p class="module-desc">
+                Un exercice de remplissage. Vous avez un stock de notes, placez-les toutes au bon endroit pour compléter le manche.
+            </p>
+            <div class="action-group">
+                <a href="section_manche/exo5.html" class="btn btn-practice">
+                    <span>Lancer l'entraînement</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

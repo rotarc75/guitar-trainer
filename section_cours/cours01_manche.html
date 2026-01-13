@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connaître son Manche</title>
+    <style>
+        /* --- STYLE EXACT DE INDEX.HTML --- */
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #1e293b;
+            --accent: #f59e0b;
+            --bg-dark: #0f172a;
+            --text-main: #f1f5f9;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* HEADER (Adapté pour avoir le bouton retour) */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative; /* Pour positionner le bouton retour */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-back {
+            position: absolute;
+            left: 0;
+            text-decoration: none;
+            color: #94a3b8;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .nav-back:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            background: linear-gradient(to right, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* GRILLE DES MODULES */
+        .modules-grid {
+            display: grid;
+            /* MODIFICATION POUR TUILES FINES :
+               On limite la largeur max des colonnes à 350px et on centre le tout.
+               Ainsi les cartes ne s'étirent pas à l'infini. */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 350px));
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .module-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centré comme sur la photo */
+            text-align: center;
+            justify-content: space-between;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        /* Style des badges "NOUVEAU" (Contenu Photo) */
+        .badge-new {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+        .bg-green { background-color: #22c55e; }
+        .bg-purple { background-color: #6366f1; }
+
+        /* Icones (Centrées comme sur la photo) */
+        .card-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        /* Titre (Style Index.html mais centré) */
+        .module-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-main); /* Blanc pour ressortir sur le fond sombre */
+            margin-bottom: 15px;
+        }
+
+        /* Description (Style Index.html) */
+        .module-desc {
+            color: #cbd5e1;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Bouton JOUER (Style Index.html "btn-practice" adapté) */
+        .btn-play {
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            border: none;
+            padding: 12px 40px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .btn-play:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="index.html" class="nav-back">← Menu</a>
+        <h1>Connaître son manche</h1>
+    </header>
+
+    <div class="modules-grid">
+
+        <div class="module-card">
+            <span class="badge-new bg-green">Nouveau</span>
+            <div class="card-icon">🎸</div>
+
+            <div class="module-title">Chasse aux Notes</div>
+            <p class="module-desc">
+                Le grand classique pour débuter ou s'échauffer. Prenez le temps de repérer les notes sur le manche à votre rythme, sans chrono imposé.
+            </p>
+
+            <a href="exo1.html" class="btn-play">Jouer</a>
+        </div>
+
+        <div class="module-card">
+            <span class="badge-new bg-purple">Nouveau</span>
+            <div class="card-icon">👁️</div>
+
+            <div class="module-title">Lecture du Manche</div>
+            <p class="module-desc">
+                Une pastille s'affiche sur le manche : identifiez la note correspondante. Idéal pour travailler vos réflexes et la lecture instantanée.
+            </p>
+
+            <a href="exo2.html" class="btn-play">Jouer</a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo 4 : Explorateur</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b; /* Pour la correction */
+            --secondary: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text-main: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* NAVIGATION */
+        .nav-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 950px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-section {
+            margin-bottom: 30px;
+        }
+
+        .target-display {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 10px 0;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .status-bar {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        #foundCount { color: var(--success); }
+        #totalCount { color: white; }
+        #timerDisplay { color: var(--primary-light); font-variant-numeric: tabular-nums; margin-left: 15px; }
+
+        /* --- MANCHE --- */
+        .fretboard-wrapper {
+            position: relative;
+            background: #18181b;
+            padding: 10px 40px 10px 60px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+            margin: 20px 0;
+            border: 4px solid #3f3f46;
+            overflow: hidden; /* Pour contenir les interactions */
+        }
+
+        .string-names {
+            position: absolute; left: 5px; top: 0; bottom: 0;
+            display: flex; flex-direction: column; justify-content: space-around;
+            font-weight: bold; color: #94a3b8; font-size: 0.8rem; padding: 10px 0;
+            width: 45px; text-align: right;
+            pointer-events: none;
+        }
+
+        /* Grille interactive */
+        .fretboard {
+            display: grid;
+            grid-template-columns: 50px repeat(12, 1fr);
+            position: relative;
+            height: 220px;
+            user-select: none;
+        }
+
+        /* Lignes de frettes */
+        .fret-line { border-right: 3px solid #a1a1aa; position: relative; z-index: 1; pointer-events: none; }
+        .nut { background-color: #fce7f3; border-right: 6px solid #e5e7eb; }
+
+        /* Cordes (visuel uniquement) */
+        .string-layer {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 2; pointer-events: none;
+        }
+        .string { position: absolute; left: 60px; right: 40px; background: linear-gradient(to bottom, #d4d4d8, #71717a); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .str-0 { top: 15%; height: 1.5px; }
+        .str-1 { top: 29%; height: 2px; }
+        .str-2 { top: 43%; height: 2.5px; }
+        .str-3 { top: 57%; height: 3.5px; }
+        .str-4 { top: 71%; height: 4px; }
+        .str-5 { top: 85%; height: 5px; }
+
+        .marker { position: absolute; width: 18px; height: 18px; background: radial-gradient(circle, #fff 0%, #cbd5e1 100%); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; }
+        .marker-double { height: 50px; width: 18px; border-radius: 10px; }
+
+        /* ZONE DE CLIC INVISIBLE */
+        .click-layer {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10;
+            display: grid;
+            grid-template-columns: 50px repeat(12, 1fr); /* Colonnes Frettes */
+            grid-template-rows: repeat(6, 1fr); /* Lignes Cordes */
+            /* Padding correspondant au fretboard-wrapper pour aligner la grille */
+            padding: 10px 40px 10px 60px;
+        }
+
+        .click-zone {
+            cursor: pointer;
+            position: relative;
+        }
+        .click-zone:hover::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 20px; height: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        /* PASTILLES DE REPONSE */
+        .dot {
+            position: absolute;
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 20;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            animation: popIn 0.3s forwards;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: bold; color: white;
+            pointer-events: none;
+        }
+
+        .dot.correct { background: radial-gradient(circle, #4ade80, #16a34a); box-shadow: 0 0 15px var(--success); }
+        .dot.wrong { background: radial-gradient(circle, #f87171, #dc2626); opacity: 0.8; }
+        .dot.missed {
+            background: radial-gradient(circle, #fcd34d, #d97706);
+            box-shadow: 0 0 15px var(--warning);
+            animation: popInSlow 1s forwards; /* Animation lente demandée */
+        }
+
+        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0); } to { transform: translate(-50%, -50%) scale(1); } }
+        @keyframes popInSlow {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* CONTROLS */
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn-action {
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            color: white;
+        }
+        .btn-solve {
+            background: rgba(255,255,255,0.1);
+            color: #cbd5e1;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-action:hover { transform: scale(1.05); }
+
+        #foundCount { color: var(--success); }
+        #totalCount { color: white; }
+        #timerDisplay { color: var(--primary-light); font-variant-numeric: tabular-nums; margin-left: 15px; }
+
+        /* AJOUT : Style du record */
+        #recordDisplay {
+            margin-left: 20px;
+            font-size: 0.95rem;
+            color: #fbbf24; /* Couleur Or */
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_manche.html" class="nav-btn">← Retour</a>
+
+    <div class="container">
+
+        <div class="header-section">
+            <h2 style="margin:0; font-size:1.2rem; color:#cbd5e1">Explorateur du Manche</h2>
+            <div class="target-display">Trouvez tous les : <span id="targetNoteName">?</span></div>
+            <div class="status-bar">
+                Trouvés : <span id="foundCount">0</span> / <span id="totalCount">0</span>
+                <span id="timerDisplay">00:00</span>
+                <span id="recordDisplay">🏆 --:--</span>
+            </div>
+        </div>
+
+        <div class="fretboard-wrapper">
+            <div class="string-names">
+                <span>e</span><span>Si</span><span>Sol</span><span>Ré</span><span>La</span><span>Mi</span>
+            </div>
+
+            <div class="fretboard" id="fretboardVisual">
+                </div>
+
+            <div class="string-layer">
+                <div class="string str-0"></div>
+                <div class="string str-1"></div>
+                <div class="string str-2"></div>
+                <div class="string str-3"></div>
+                <div class="string str-4"></div>
+                <div class="string str-5"></div>
+            </div>
+
+            <div class="click-layer" id="clickLayer">
+                </div>
+
+        </div>
+
+        <div class="controls">
+            <button class="btn-action btn-solve" id="solveBtn" onclick="showCorrection()">Voir la correction</button>
+            <button class="btn-action btn-next" id="nextBtn" onclick="nextRound()">Note Suivante</button>
+        </div>
+
+    </div>
+
+<script>
+    // --- DATA ---
+    // Cordes Tablature: 0=e(aigu), 1=B, 2=G, 3=D, 4=A, 5=E(grave)
+    // Offsets: e=4, B=11, G=7, D=2, A=9, E=4
+    const stringOffsets = [4, 11, 7, 2, 9, 4];
+    const noteNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+
+    // --- STATE ---
+    let currentTargetIndex = -1; // 0-11
+    let totalOccurrences = 0;
+    let foundOccurrences = 0;
+    let foundPositions = []; // Stocke les "string-fret" déjà trouvés
+    let isRoundActive = true;
+
+    // CHRONO
+    let timerInterval = null;
+    let startTime = 0;
+
+    // DOM
+    const targetNameEl = document.getElementById('targetNoteName');
+    const foundCountEl = document.getElementById('foundCount');
+    const totalCountEl = document.getElementById('totalCount');
+    const clickLayer = document.getElementById('clickLayer');
+    const solveBtn = document.getElementById('solveBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const recordDisplay = document.getElementById('recordDisplay'); // <-- AJOUT
+    const RECORD_KEY_PREFIX = "guitar_exo4_note_"; // Préfixe pour localStorage
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        startTime = Date.now();
+        document.getElementById('timerDisplay').textContent = "00:00";
+
+        timerInterval = setInterval(() => {
+            let elapsed = Date.now() - startTime;
+            document.getElementById('timerDisplay').textContent = formatTime(elapsed);
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    function formatTime(ms) {
+        let seconds = Math.floor(ms / 1000);
+        let minutes = Math.floor(seconds / 60);
+        seconds = seconds % 60;
+        return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    function init() {
+        buildVisualFretboard();
+        buildClickLayer();
+        nextRound();
+    }
+
+    function buildVisualFretboard() {
+        const board = document.getElementById('fretboardVisual');
+        for(let i=0; i<=12; i++) {
+            let div = document.createElement('div');
+            div.className = i === 0 ? 'nut' : 'fret-line';
+            if ([3,5,7,9].includes(i)) {
+                let m = document.createElement('div');
+                m.className = 'marker';
+                div.appendChild(m);
+            }
+            if (i === 12) {
+                let m = document.createElement('div');
+                m.className = 'marker marker-double';
+                div.appendChild(m);
+            }
+            board.appendChild(div);
+        }
+    }
+
+    function buildClickLayer() {
+        clickLayer.innerHTML = '';
+        // 6 cordes (lignes) x 13 frettes (colonnes 0-12)
+        // ATTENTION: Grid CSS layout:
+        // rows: 0 (e) to 5 (E)
+        // cols: 0 to 12
+        for(let s=0; s<6; s++) {
+            for(let f=0; f<=12; f++) {
+                let zone = document.createElement('div');
+                zone.className = 'click-zone';
+                zone.dataset.string = s;
+                zone.dataset.fret = f;
+                zone.id = `zone-${s}-${f}`;
+                zone.onclick = () => handleNoteClick(s, f);
+                clickLayer.appendChild(zone);
+            }
+        }
+    }
+
+    function nextRound() {
+        // Nettoyage
+        document.querySelectorAll('.dot').forEach(d => d.remove());
+        foundPositions = [];
+        foundOccurrences = 0;
+        isRoundActive = true;
+        solveBtn.disabled = false;
+
+        // Nouvelle note au hasard (uniquement naturelles pour commencer ? Non, tout.)
+        currentTargetIndex = Math.floor(Math.random() * 12);
+
+        // Calcul du nombre total de cette note sur les 12 premières cases
+        calculateTotalOccurrences();
+
+        // UI
+        targetNameEl.textContent = noteNames[currentTargetIndex];
+        foundCountEl.textContent = "0";
+        totalCountEl.textContent = totalOccurrences;
+        startTimer();
+    }
+
+    function calculateTotalOccurrences() {
+        totalOccurrences = 0;
+        for(let s=0; s<6; s++) {
+            for(let f=0; f<=12; f++) {
+                let note = (stringOffsets[s] + f) % 12;
+                if(note === currentTargetIndex) {
+                    totalOccurrences++;
+                }
+            }
+        }
+    }
+
+    function handleNoteClick(stringIdx, fretIdx) {
+        if(!isRoundActive) return;
+
+        // Éviter double clic sur une bonne réponse
+        let posId = `${stringIdx}-${fretIdx}`;
+        if(foundPositions.includes(posId)) return;
+
+        let clickedNoteIndex = (stringOffsets[stringIdx] + fretIdx) % 12;
+        let zone = document.getElementById(`zone-${stringIdx}-${fretIdx}`);
+
+        if(clickedNoteIndex === currentTargetIndex) {
+            // CORRECT
+            addDot(zone, 'correct');
+            foundPositions.push(posId);
+            foundOccurrences++;
+            foundCountEl.textContent = foundOccurrences;
+
+            if(foundOccurrences === totalOccurrences) {
+                victory();
+            }
+        } else {
+            // FAUX
+            addDot(zone, 'wrong', true); // true = temporaire
+        }
+    }
+
+    function addDot(container, type, isTemporary = false) {
+        let dot = document.createElement('div');
+        dot.className = `dot ${type}`;
+        container.appendChild(dot);
+
+        if(isTemporary) {
+            setTimeout(() => dot.remove(), 800);
+        }
+    }
+
+    function loadRecord() {
+        // On cherche le record spécifique à la note en cours (currentTargetIndex)
+        let key = RECORD_KEY_PREFIX + currentTargetIndex;
+        let bestTime = localStorage.getItem(key);
+
+        if (bestTime) {
+            recordDisplay.textContent = "🏆 " + formatTime(parseInt(bestTime));
+        } else {
+            recordDisplay.textContent = "🏆 --:--";
+        }
+        recordDisplay.style.color = "#fbbf24"; // Reset couleur (si c'était "Nouveau record")
+    }
+
+    function checkRecord(finalTimeMs) {
+        let key = RECORD_KEY_PREFIX + currentTargetIndex;
+        let currentBest = localStorage.getItem(key);
+
+        // Si pas de record OU si on a fait mieux (temps plus petit)
+        if (!currentBest || finalTimeMs < parseInt(currentBest)) {
+            localStorage.setItem(key, finalTimeMs);
+            recordDisplay.textContent = "🏆 " + formatTime(finalTimeMs) + " (Record !)";
+            recordDisplay.style.color = "#fff"; // Flash blanc ou autre effet
+            return true;
+        }
+        return false;
+    }
+
+    function victory() {
+        stopTimer();
+        let finalTimeMs = Date.now() - startTime;
+        isRoundActive = false;
+        targetNameEl.textContent = "Bravo !";
+        solveBtn.disabled = true;
+        checkRecord(finalTimeMs);
+    }
+
+    function showCorrection() {
+        stopTimer();
+        isRoundActive = false; // On arrête le jeu
+        solveBtn.disabled = true;
+
+        let missingList = [];
+
+        // Identifier les manquants
+        for(let s=0; s<6; s++) {
+            for(let f=0; f<=12; f++) {
+                let note = (stringOffsets[s] + f) % 12;
+                let posId = `${s}-${f}`;
+
+                if(note === currentTargetIndex && !foundPositions.includes(posId)) {
+                    missingList.push({s, f});
+                }
+            }
+        }
+
+        // Afficher un par un avec délai (1s)
+        missingList.forEach((pos, index) => {
+            setTimeout(() => {
+                let zone = document.getElementById(`zone-${pos.s}-${pos.f}`);
+                addDot(zone, 'missed');
+                // Optionnel: afficher le nom de la note
+                zone.lastChild.textContent = noteNames[currentTargetIndex];
+            }, index * 1000); // 1 seconde entre chaque
+        });
+    }
+
+    init();
+
+</script>
+</body>
+</html>

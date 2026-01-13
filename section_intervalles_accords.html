@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intervalles & Accords</title>
+    <style>
+        :root {
+            --primary: #f472b6; /* Rose pour la théorie */
+            --primary-light: #fbcfe8;
+            --secondary: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(330,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(200,49%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .nav-back {
+            position: absolute; left: 0; top: 0;
+            text-decoration: none; color: rgba(255,255,255,0.7);
+            padding: 10px 20px; border-radius: 30px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s; font-weight: 600; font-size: 0.9rem;
+        }
+        .nav-back:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        h1 {
+            font-size: 2.5rem; margin: 0 0 10px 0;
+            background: linear-gradient(to right, #f472b6, #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* GRILLE */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .module-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-decoration: none;
+            color: var(--text-main);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+            border-color: rgba(244, 114, 182, 0.3);
+        }
+
+        .icon-box {
+            width: 60px; height: 60px;
+            background: rgba(244, 114, 182, 0.1);
+            border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; margin-bottom: 20px;
+            border: 1px solid rgba(244, 114, 182, 0.2);
+        }
+
+        .module-card:hover .icon-box {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 20px rgba(244, 114, 182, 0.4);
+        }
+
+        .module-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; }
+        .module-desc { color: var(--text-muted); line-height: 1.5; font-size: 0.95rem; margin-bottom: 20px; flex-grow: 1; }
+
+        .btn-access {
+            background: transparent;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 0;
+            border: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .module-card:hover .btn-access { color: white; }
+
+        /* Style pour "Bientôt" */
+        .module-card.locked { opacity: 0.6; cursor: default; }
+        .module-card.locked:hover { transform: none; box-shadow: none; border-color: rgba(255,255,255,0.05); }
+        .module-card.locked .icon-box { background: rgba(255,255,255,0.05); border-color: transparent; color: #64748b; }
+        .badge-soon {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255,255,255,0.1); color: #94a3b8;
+            font-size: 0.75rem; font-weight: bold; padding: 4px 10px; border-radius: 20px;
+        }
+
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+        <header>
+            <a href="index.html" class="nav-back">← Retour</a>
+            <h1>Intervalles & Accords</h1>
+            <div class="subtitle">Comprendre la structure de la musique</div>
+        </header>
+
+        <div class="modules-grid">
+
+            <a href="section_intervalles_accords/exo0.html" class="module-card">
+                <div class="icon-box">🔄</div>
+                <div class="module-title">Exo 0 : Le Cycle</div>
+                <div class="module-desc">
+                    L'exercice fondamental. Avant ou Après ? Maîtrisez l'ordre des notes sur le bout des doigts.
+                </div>
+                <span class="btn-access">S'entraîner →</span>
+            </a>
+
+            <a href="section_intervalles_accords/exo1.html" class="module-card">
+                <div class="icon-box">👣</div>
+                <div class="module-title">Tons & Demi-tons</div>
+                <div class="module-desc">
+                    L'échauffement indispensable. Jonglez avec les notes : +1 Ton, -1/2 Ton...
+                </div>
+                <span class="btn-access">S'entraîner →</span>
+            </a>
+
+            <a href="section_intervalles_accords/exo2.html" class="module-card">
+                <div class="icon-box">📐</div>
+                <div class="module-title">Maître des Intervalles</div>
+                <div class="module-desc">
+                    Calcul mental musical : Trouvez la Tierce, la Quinte ou la Septième d'une note donnée. La base absolue.
+                </div>
+                <span class="btn-access">S'entraîner →</span>
+            </a>
+
+            <div class="module-card locked">
+                <div class="badge-soon">Bientôt</div>
+                <div class="icon-box">🎹</div>
+                <div class="module-title">Construction d'Accords</div>
+                <div class="module-desc">
+                    Assemblez les intervalles pour créer des accords Majeurs, Mineurs et 7ème.
+                </div>
+            </div>
+
+            <div class="module-card locked">
+                <div class="badge-soon">Bientôt</div>
+                <div class="icon-box">🎼</div>
+                <div class="module-title">Harmonisation</div>
+                <div class="module-desc">
+                    Découvrez quels accords appartiennent à quelle tonalité (Gamme Majeure).
+                </div>
+            </div>
+
+        </div> </div>
+
+</body>
+</html>

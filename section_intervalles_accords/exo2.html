@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo 6 : Les Intervalles</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --secondary: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text-main: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+        }
+
+        .nav-btn {
+            position: absolute; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px; border-radius: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center; max-width: 700px; width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* HEADER */
+        .score-display {
+            font-size: 1.1rem; color: #94a3b8; font-weight: 700; margin-bottom: 20px;
+            display: flex; justify-content: space-between;
+        }
+        .streak { color: var(--primary-light); }
+
+        /* QUESTION BOX */
+        .question-box {
+            background: rgba(0,0,0,0.2);
+            padding: 30px; border-radius: 20px;
+            margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);
+            position: relative; overflow: hidden;
+        }
+
+        .interval-label {
+            font-size: 1.4rem; font-weight: 300; color: #cbd5e1; margin-bottom: 5px; display: block;
+        }
+
+        .interval-name {
+            font-size: 2rem; font-weight: 900; color: var(--primary-light);
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.3); display: block; margin-bottom: 15px;
+        }
+
+        .calc-row {
+            display: flex; justify-content: center; align-items: center; gap: 15px;
+            font-size: 1.5rem; font-weight: bold;
+        }
+
+        .root-note { color: white; font-size: 3rem; font-weight: 900; }
+        .plus-sign { color: #64748b; }
+
+        /* REPONSES */
+        .answers-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+        }
+        @media (max-width: 500px) { .answers-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .note-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 0; border-radius: 12px; color: white; font-weight: 700; font-size: 1.1rem;
+            cursor: pointer; transition: all 0.1s;
+        }
+        .note-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); border-color: var(--primary); }
+        .note-btn:active { transform: scale(0.95); }
+
+        .note-btn.correct { background: var(--success) !important; border-color: var(--success); box-shadow: 0 0 15px var(--success); }
+        .note-btn.wrong { background: var(--danger) !important; border-color: var(--danger); opacity: 0.5; }
+
+        /* CONFIGURATION */
+        .config-toggles {
+            display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .toggle-btn {
+            padding: 5px 12px; border-radius: 20px; border: 1px solid #475569;
+            background: transparent; color: #94a3b8; font-size: 0.8rem; cursor: pointer;
+        }
+        .toggle-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
+
+    <div class="container">
+
+        <div class="score-display">
+            <span>Score: <span id="scoreVal">0</span></span>
+            <span class="streak">Série: <span id="streakVal">0</span></span>
+        </div>
+
+        <div class="config-toggles" id="filterContainer">
+            </div>
+
+        <div class="question-box">
+            <span class="interval-label">Trouve la...</span>
+            <span class="interval-name" id="intervalName">Tierce Majeure</span>
+
+            <div class="calc-row">
+                <span class="plus-sign">de</span>
+                <span class="root-note" id="rootNote">Do</span>
+            </div>
+        </div>
+
+        <div class="answers-grid" id="answersGrid">
+            </div>
+
+    </div>
+
+<script>
+    const noteNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+
+    // Définition des intervalles (Nom + Demi-tons)
+    const allIntervals = [
+        { name: "Seconde Mineure (b2)", semitones: 1, group: "easy" },
+        { name: "Seconde Majeure (2)", semitones: 2, group: "easy" },
+        { name: "Tierce Mineure (b3)", semitones: 3, group: "chords" },
+        { name: "Tierce Majeure (3)", semitones: 4, group: "chords" },
+        { name: "Quarte Juste (4)", semitones: 5, group: "hard" },
+        { name: "Quinte Juste (5)", semitones: 7, group: "chords" },
+        { name: "Sixte Mineure (b6)", semitones: 8, group: "hard" },
+        { name: "Sixte Majeure (6)", semitones: 9, group: "hard" },
+        { name: "Septième Mineure (b7)", semitones: 10, group: "chords" },
+        { name: "Septième Majeure (7M)", semitones: 11, group: "chords" }
+    ];
+
+    // État du jeu
+    let currentRootIndex = 0;
+    let currentInterval = null;
+    let activeGroups = ["chords"]; // Par défaut : les intervalles d'accords (3, 5, 7)
+    let score = 0;
+    let streak = 0;
+    let isProcessing = false;
+
+    // DOM
+    const intervalName = document.getElementById('intervalName');
+    const rootNote = document.getElementById('rootNote');
+    const answersGrid = document.getElementById('answersGrid');
+    const scoreVal = document.getElementById('scoreVal');
+    const streakVal = document.getElementById('streakVal');
+    const filterContainer = document.getElementById('filterContainer');
+
+    function init() {
+        buildFilters();
+        generateGrid();
+        nextQuestion();
+    }
+
+    function buildFilters() {
+        const filters = [
+            { id: "easy", label: "2des" },
+            { id: "chords", label: "Accords (3/5/7)" },
+            { id: "hard", label: "4tes/6tes" }
+        ];
+
+        filterContainer.innerHTML = '';
+        filters.forEach(f => {
+            let btn = document.createElement('button');
+            btn.className = `toggle-btn ${activeGroups.includes(f.id) ? 'active' : ''}`;
+            btn.textContent = f.label;
+            btn.onclick = () => toggleFilter(f.id, btn);
+            filterContainer.appendChild(btn);
+        });
+    }
+
+    function toggleFilter(groupId, btn) {
+        if(activeGroups.includes(groupId)) {
+            if(activeGroups.length > 1) { // On empêche de tout désactiver
+                activeGroups = activeGroups.filter(g => g !== groupId);
+                btn.classList.remove('active');
+            }
+        } else {
+            activeGroups.push(groupId);
+            btn.classList.add('active');
+        }
+        nextQuestion();
+    }
+
+    function generateGrid() {
+        answersGrid.innerHTML = '';
+        noteNames.forEach((note, index) => {
+            let btn = document.createElement('div');
+            btn.className = 'note-btn';
+            btn.textContent = note;
+            btn.onclick = () => checkAnswer(index, btn);
+            answersGrid.appendChild(btn);
+        });
+    }
+
+    function nextQuestion() {
+        isProcessing = false;
+        document.querySelectorAll('.note-btn').forEach(b => b.classList.remove('correct', 'wrong'));
+
+        // 1. Choisir une note racine
+        currentRootIndex = Math.floor(Math.random() * 12);
+
+        // 2. Choisir un intervalle basé sur les filtres actifs
+        let pool = allIntervals.filter(i => activeGroups.includes(i.group));
+        currentInterval = pool[Math.floor(Math.random() * pool.length)];
+
+        // UI
+        rootNote.textContent = noteNames[currentRootIndex];
+        intervalName.textContent = currentInterval.name;
+    }
+
+    function checkAnswer(clickedIndex, btnElement) {
+        if(isProcessing) return;
+        isProcessing = true;
+
+        // MATHÉMATIQUE MUSICALE : (Racine + Demi-tons) Modulo 12
+        let correctIndex = (currentRootIndex + currentInterval.semitones) % 12;
+
+        if(clickedIndex === correctIndex) {
+            // BRAVO
+            btnElement.classList.add('correct');
+            score++;
+            streak++;
+            updateScore();
+            setTimeout(nextQuestion, 600);
+        } else {
+            // RATE
+            btnElement.classList.add('wrong');
+            streak = 0;
+            updateScore();
+
+            // Montrer la réponse
+            let allBtns = document.querySelectorAll('.note-btn');
+            allBtns[correctIndex].classList.add('correct');
+
+            setTimeout(nextQuestion, 2000); // On laisse plus de temps pour comprendre l'erreur
+        }
+    }
+
+    function updateScore() {
+        scoreVal.textContent = score;
+        streakVal.textContent = streak;
+    }
+
+    init();
+
+</script>
+</body>
+</html>

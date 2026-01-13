@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guitare Hero - Trainer V10</title>
+    <style>
+        :root {
+            --primary: #4f46e5; /* Indigo */
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --gold: #f59e0b;
+            --secondary: #1e293b;
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* BOUTON RETOUR */
+        .back-link {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s ease;
+            z-index: 100;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow:
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- UI JEU --- */
+        #gameUI { display: block; }
+        #summaryUI { display: none; }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .record-badge {
+            font-size: 0.85rem;
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            padding: 6px 12px;
+            border-radius: 12px;
+            color: #334155;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .score-live {
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
+            margin-bottom: 10px;
+        }
+
+        /* L'écran principal (Tuner style) */
+        .note-display {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            height: 240px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 24px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.2);
+            border: 4px solid #334155;
+        }
+
+        .note-display.success {
+            background: radial-gradient(circle at center, #10b981 0%, #064e3b 100%);
+            border-color: #34d399;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+            transform: scale(1.02);
+        }
+        .note-display.failure {
+            background: radial-gradient(circle at center, #ef4444 0%, #7f1d1d 100%);
+            border-color: #f87171;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        .note-display.survival {
+            border-color: var(--gold);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+        }
+        /* Style spécial Training (Cyan) */
+        .note-display.training {
+            border-color: #06b6d4;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .note-target {
+            font-size: 7rem;
+            font-weight: 800;
+            z-index: 2;
+            line-height: 1;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .note-detected {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.6);
+            margin-top: 15px;
+            height: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Indicateur de stabilité */
+        .lock-container {
+            width: 100px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: flex;
+        }
+        .lock-fill-ok { height: 100%; width: 0%; background: #4ade80; transition: width 0.05s linear; box-shadow: 0 0 10px #4ade80; }
+        .lock-fill-bad { height: 100%; width: 0%; background: #f87171; transition: width 0.05s linear; box-shadow: 0 0 10px #f87171; }
+
+        .points-pop {
+            position: absolute;
+            font-size: 3rem;
+            font-weight: 900;
+            color: #fff;
+            opacity: 0;
+            z-index: 10;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .points-pop.anim { animation: floatUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(20px) scale(0.5); }
+            50% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1); }
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 8px;
+            background-color: var(--gold);
+            width: 100%;
+            transform-origin: left;
+            box-shadow: 0 -2px 10px rgba(245, 158, 11, 0.5);
+        }
+
+        /* --- CONTROLS --- */
+        .controls {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: left;
+            display: grid;
+            gap: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Sélecteur de Mode */
+        .mode-selector {
+            display: flex;
+            background: #e2e8f0;
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 5px;
+            gap: 5px;
+        }
+        .mode-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            color: #64748b;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            line-height: 1.2;
+        }
+        .mode-btn:hover { background: rgba(255,255,255,0.5); }
+        .mode-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .mode-btn.survival-active { color: var(--gold); }
+        /* Style spécial pour le bouton Training */
+        .mode-btn.training-active { color: #06b6d4; }
+
+        /* Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #cbd5e1;
+            border-radius: 5px;
+            outline: none;
+            margin-top: 10px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.4);
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+
+        .btn-main {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 30px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+        }
+        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.5); }
+        .btn-main:active { transform: translateY(-1px); }
+
+        .btn-main.active { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.4); }
+
+        .btn-main.survival-mode { background: linear-gradient(135deg, var(--gold) 0%, #fbbf24 100%); color: #78350f; box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4); }
+        /* Style pour Training */
+        .btn-main.training-mode { background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); box-shadow: 0 10px 20px -5px rgba(6, 182, 212, 0.4); }
+
+        .mic-status { font-size: 0.85rem; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; color: #64748b; font-weight: 500;}
+        .dot { height: 10px; width: 10px; border-radius: 50%; background-color: #cbd5e1; }
+        .dot.on { background-color: var(--danger); box-shadow: 0 0 10px var(--danger); animation: blink 2s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* --- UI RÉSUMÉ --- */
+        .summary-total-score { font-size: 4.5rem; font-weight: 900; color: var(--primary); margin: 10px 0; letter-spacing: -2px; text-shadow: 2px 2px 0px rgba(0,0,0,0.05); }
+        .summary-details { margin: 20px 0; text-align: left; max-height: 250px; overflow-y: auto; border-top: 1px solid #e2e8f0; padding-top: 10px;}
+        .history-item { display: flex; justify-content: space-between; padding: 15px 10px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #475569; }
+        .history-item:last-child { border-bottom: none; }
+        .history-item.ok { color: var(--success); background: rgba(16, 185, 129, 0.05); border-radius: 8px; margin-bottom: 5px;}
+        .history-item.nok { color: var(--danger); background: rgba(239, 68, 68, 0.05); border-radius: 8px; margin-bottom: 5px;}
+        .new-record { color: var(--gold); font-weight: 800; display: none; margin-bottom: 15px; font-size: 1.2rem; animation: pulse 1s infinite;}
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_manche.html" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Menu
+    </a>
+
+    <div class="container">
+        <div id="gameUI">
+            <div class="header-info">
+                <span id="recordDisplay" class="record-badge">Record: 0</span>
+                <span id="counterText">1 / 10</span>
+            </div>
+
+            <div class="score-live" id="liveScore">Score: 0</div>
+
+            <div class="note-display" id="displayBox">
+                <div class="note-target" id="noteTarget">?</div>
+                <div class="note-detected" id="detectedText">Prêt ?</div>
+
+                <div class="lock-container">
+                    <div class="lock-fill-ok" id="lockFillOk"></div>
+                    <div class="lock-fill-bad" id="lockFillBad"></div>
+                </div>
+
+                <div class="points-pop" id="pointsPop">+1</div>
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="mic-status">
+                <div class="dot" id="micDot"></div>
+                <span id="micStatusText">Micro en veille</span>
+            </div>
+
+            <div class="controls" id="controlsBlock">
+
+                <div class="mode-selector">
+                    <button class="mode-btn active" id="btnModeSession" onclick="setMode('session')">Session (10)</button>
+                    <button class="mode-btn" id="btnModeSurvival" onclick="setMode('survival')">☠️ SURVIE</button>
+                    <button class="mode-btn" id="btnModeTraining" onclick="setMode('training')">Entraînement</button>
+                </div>
+
+                <div id="difficultyGroup">
+                    <label style="font-weight:700; color:#475569; display:flex; justify-content:space-between; margin-bottom:5px;">
+                        Temps imparti
+                        <span id="timeDisplay" style="color:var(--primary)">5.0 sec</span>
+                    </label>
+                    <input type="range" id="speedRange" min="1.5" max="10" step="0.5" value="5">
+                </div>
+
+                <div id="survivalInfo" style="display:none; color:#b45309; font-size:0.9rem; font-weight:bold; background:#fffbeb; padding:15px; border-radius:12px; border:1px solid #fcd34d; text-align:center;">
+                    🔥 Mode Survie Activé 🔥<br>
+                    <span style="font-weight:normal; font-size:0.85rem">Temps bloqué à 2s • Une erreur = Fin</span>
+                </div>
+
+                <div id="trainingOptions" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid #e2e8f0;">
+                    <label style="font-weight:700; color:#0891b2; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                        <span>Notes naturelles uniquement</span>
+                        <input type="checkbox" id="naturalsCheckbox" style="width:20px; height:20px; accent-color:#06b6d4;">
+                    </label>
+                </div>
+
+            </div>
+
+            <button id="toggleBtn" class="btn-main">Activer Micro & Jouer</button>
+        </div>
+
+        <div id="summaryUI">
+            <h2 style="font-size:2rem; margin-bottom:5px; color:#1e293b" id="endTitle">Terminé !</h2>
+
+            <div class="new-record" id="newRecordMsg">🏆 NOUVEAU RECORD ! 🏆</div>
+
+            <div style="color:#94a3b8; text-transform:uppercase; letter-spacing:1px; font-size:0.9rem; margin-top:10px;">Score Final</div>
+            <div class="summary-total-score" id="finalTotalScore">0</div>
+
+            <div class="summary-details" id="historyList"></div>
+
+            <button id="restartBtn" class="btn-main">Rejouer</button>
+        </div>
+
+    </div>
+
+    <script>
+        /* --- CONFIGURATION & VARIABLES --- */
+        const noteNames=["Do","Do#","Ré","Ré#","Mi","Fa","Fa#","Sol","Sol#","La","La#","Si"];
+        const naturalNotes = ["Do","Ré","Mi","Fa","Sol","La","Si"]; // Liste sans dièses
+        let audioContext=null,analyser=null,pitchLoopId=null;
+
+        // Éléments du DOM
+        const gameUI=document.getElementById("gameUI"),summaryUI=document.getElementById("summaryUI"),noteTarget=document.getElementById("noteTarget"),detectedText=document.getElementById("detectedText"),displayBox=document.getElementById("displayBox"),pointsPop=document.getElementById("pointsPop"),toggleBtn=document.getElementById("toggleBtn"),progressBar=document.getElementById("progressBar"),speedRange=document.getElementById("speedRange"),counterText=document.getElementById("counterText"),liveScore=document.getElementById("liveScore"),controlsBlock=document.getElementById("controlsBlock"),timeDisplay=document.getElementById("timeDisplay"),micDot=document.getElementById("micDot"),lockFillOk=document.getElementById("lockFillOk"),lockFillBad=document.getElementById("lockFillBad"),recordDisplay=document.getElementById("recordDisplay"),difficultyGroup=document.getElementById("difficultyGroup"),survivalInfo=document.getElementById("survivalInfo");
+        const btnModeSession=document.getElementById("btnModeSession"),btnModeSurvival=document.getElementById("btnModeSurvival"),btnModeTraining=document.getElementById("btnModeTraining");
+        const trainingOptions = document.getElementById("trainingOptions"); // Le div option
+        const naturalsCheckbox = document.getElementById("naturalsCheckbox"); // La checkbox
+
+        // Variables de jeu
+        let isRunning=!1,isDetecting=!1,currentTargetNote="",duration=5e3,startTime=0,currentMode="session";
+        let timerAnimationId=null, logicTimeoutId=null, nextRoundTimeoutId=null;
+        let onlyNaturals = false;
+
+        const SUCCESS_FRAMES=8,FAIL_FRAMES_TOLERANCE=15;
+        let successCounter=0,failCounter=0,lastDetectedNote="",isCurrentlyPlayingCorrectNote=!1,totalRounds=10,currentRound=0,totalScore=0,gameHistory=[];
+        const STORAGE_KEY="guitarTrainerRecords_v1";
+        let records={session:0,survival:0};
+
+        /* --- GESTION DES RECORDS --- */
+        function loadRecords(){const e=localStorage.getItem(STORAGE_KEY);e&&(records=JSON.parse(e)),updateRecordDisplay()}
+
+        function saveRecord(e){
+            if(currentMode === 'training') return false;
+            return e>records[currentMode]&&(records[currentMode]=e,localStorage.setItem(STORAGE_KEY,JSON.stringify(records)),!0)
+        }
+
+        function updateRecordDisplay(){
+            if(currentMode === 'training') {
+                recordDisplay.textContent = "Mode Entraînement";
+            } else {
+                recordDisplay.textContent=`Record (${"session"===currentMode?"Session":"Survie"}) : ${records[currentMode]}`;
+            }
+        }
+
+        /* --- GESTION DES MODES --- */
+        window.setMode=function(e){
+            if(isRunning) return;
+            currentMode=e;
+
+            // Reset styles
+            btnModeSession.classList.remove("active");
+            btnModeSurvival.classList.remove("active","survival-active");
+            btnModeTraining.classList.remove("active","training-active");
+            displayBox.classList.remove("survival", "training");
+            toggleBtn.classList.remove("survival-mode", "training-mode");
+
+            // Reset affichage options
+            difficultyGroup.style.display="none";
+            survivalInfo.style.display="none";
+            if(trainingOptions) trainingOptions.style.display="none";
+
+            if(e==="session") {
+                btnModeSession.classList.add("active");
+                difficultyGroup.style.display="block";
+                counterText.textContent="1 / 10";
+            } else if(e==="survival") {
+                btnModeSurvival.classList.add("active","survival-active");
+                displayBox.classList.add("survival");
+                toggleBtn.classList.add("survival-mode");
+                survivalInfo.style.display="block";
+                counterText.textContent="Survie";
+            } else if(e==="training") {
+                btnModeTraining.classList.add("active","training-active");
+                displayBox.classList.add("training");
+                toggleBtn.classList.add("training-mode");
+                // Affiche l'option notes naturelles
+                if(trainingOptions) trainingOptions.style.display="block";
+                counterText.textContent="Série : 0";
+            }
+            updateRecordDisplay();
+            updateTimeDisplay();
+        };
+
+        // Ecouteur sur la checkbox
+        if(naturalsCheckbox){
+            naturalsCheckbox.addEventListener('change', (e) => {
+                onlyNaturals = e.target.checked;
+            });
+        }
+
+        /* --- AUDIO --- */
+        async function startAudio(){try{audioContext=new(window.AudioContext||window.webkitAudioContext);const e=await navigator.mediaDevices.getUserMedia({audio:!0}),t=audioContext.createMediaStreamSource(e);analyser=audioContext.createAnalyser(),analyser.fftSize=4096,t.connect(analyser),micDot.classList.add("on"),document.getElementById("micStatusText").textContent="Micro actif",startPitchLoop()}catch(e){alert("Erreur micro. Vérifiez les permissions."),resetGameUI()}}
+
+        function startPitchLoop(){pitchLoopId&&cancelAnimationFrame(pitchLoopId),detectPitchLoop()}
+
+        function detectPitchLoop(){if(!isRunning)return;if(!isDetecting)return void(pitchLoopId=requestAnimationFrame(detectPitchLoop));const e=new Float32Array(analyser.fftSize);analyser.getFloatTimeDomainData(e);const t=autoCorrelate(e,audioContext.sampleRate);if(t>70&&t<1e3){const e=getNoteIndexFromFreq(t),n=noteNames[e%12];detectedText.textContent=`Entendu : ${n}`,n===currentTargetNote?(isCurrentlyPlayingCorrectNote=!0,failCounter=0,lockFillBad.style.width="0%",successCounter++,lockFillOk.style.width=Math.min(100,successCounter/SUCCESS_FRAMES*100)+"%",successCounter>=SUCCESS_FRAMES&&triggerSuccess()):(isCurrentlyPlayingCorrectNote=!1,successCounter=0,lockFillOk.style.width="0%",n===lastDetectedNote?failCounter++:(lastDetectedNote=n,failCounter=0),lockFillBad.style.width=Math.min(100,failCounter/FAIL_FRAMES_TOLERANCE*100)+"%",failCounter>=FAIL_FRAMES_TOLERANCE&&triggerFailure(!0,n))}else isCurrentlyPlayingCorrectNote=!1,successCounter=0,failCounter=0,lockFillOk.style.width="0%",lockFillBad.style.width="0%",detectedText.textContent="...";pitchLoopId=requestAnimationFrame(detectPitchLoop)}
+
+        /* --- MOTEUR DE JEU --- */
+        function updateTimeDisplay(){
+            if(currentMode === 'training') {
+                timeDisplay.textContent = "Illimité";
+            } else if(currentMode === 'survival') {
+                duration = 2000; // en ms
+                timeDisplay.textContent = "2 sec";
+            } else {
+                let e=parseFloat(speedRange.value);
+                duration=1e3*e;
+                timeDisplay.textContent=`${e.toFixed(1)} sec`;
+            }
+        }
+
+        speedRange.addEventListener("input",updateTimeDisplay);
+        loadRecords();
+        updateTimeDisplay();
+
+        toggleBtn.addEventListener("click",(()=>{isRunning?resetGameUI():startGame()}));
+
+        function startGame(){
+            isRunning=!0;
+            toggleBtn.textContent="Arrêter";
+            toggleBtn.classList.add("active");
+
+            // Bloquer les contrôles
+            controlsBlock.style.opacity="0.5";
+            controlsBlock.style.pointerEvents="none";
+
+            document.getElementById("newRecordMsg").style.display="none";
+            updateTimeDisplay();
+
+            totalRounds=10; currentRound=0; totalScore=0; gameHistory=[];
+            liveScore.textContent="Score: 0";
+
+            if(audioContext) {
+                audioContext.resume().then((()=>{micDot.classList.add("on"),startPitchLoop()}));
+            } else {
+                startAudio();
+            }
+            nextRound();
+        }
+
+        function nextRound(){
+            // Check si le jeu est toujours en cours
+            if(!isRunning) return;
+
+            clearTimeout(logicTimeoutId);
+            clearTimeout(nextRoundTimeoutId); // Annulation du délai précédent (le fix)
+            cancelAnimationFrame(timerAnimationId);
+
+            displayBox.classList.remove("success","failure");
+            pointsPop.classList.remove("anim");
+            lockFillOk.style.width="0%";
+            lockFillBad.style.width="0%";
+            successCounter=0;
+            failCounter=0;
+            isCurrentlyPlayingCorrectNote=!1;
+            detectedText.textContent="En attente...";
+
+            if(currentMode === "session" && currentRound >= totalRounds) {
+                endGame();
+            } else {
+                currentRound++;
+                if(currentMode==="session") counterText.textContent=`${currentRound} / ${totalRounds}`;
+                else if(currentMode==="survival" || currentMode==="training") counterText.textContent=`Série : ${currentRound}`;
+
+                isDetecting=!0;
+
+                // --- CHOIX DE LA NOTE ---
+                // Si Training + Case Cochée => Liste réduite
+                let pool = (currentMode === 'training' && onlyNaturals)
+                           ? naturalNotes
+                           : noteNames;
+
+                let e;do{e=pool[Math.floor(Math.random()*pool.length)]}while(e===currentTargetNote&&pool.length>1);
+                currentTargetNote=e;
+                noteTarget.textContent=currentTargetNote;
+
+                startTimer();
+            }
+        }
+
+        function startTimer(){
+            startTime=performance.now();
+            progressBar.style.width="100%";
+
+            // TRAINING : Pas de chrono
+            if(currentMode === 'training') {
+                return;
+            }
+
+            logicTimeoutId=setTimeout((()=>{isDetecting&&(isCurrentlyPlayingCorrectNote?setTimeout((()=>{isDetecting&&triggerFailure(!1,null)}),300):triggerFailure(!1,null))}),duration);
+
+            timerAnimationId=requestAnimationFrame((function e(){const t=performance.now()-startTime,n=Math.max(0,(duration-t)/duration*100);progressBar.style.width=n+"%",t<duration+300&&isDetecting&&(timerAnimationId=requestAnimationFrame(e))}));
+        }
+
+        function triggerSuccess(){
+            isDetecting=!1;
+            clearTimeout(logicTimeoutId);
+            totalScore++;
+            liveScore.textContent=`Score: ${totalScore}`;
+            pointsPop.textContent="+1";
+            pointsPop.classList.remove("anim");
+            void pointsPop.offsetWidth;
+            pointsPop.classList.add("anim");
+            gameHistory.push({note:currentTargetNote,result:!0,pts:1,type:"ok"});
+            displayBox.classList.add("success");
+            detectedText.textContent="BRAVO !";
+            // On stocke le timeout pour pouvoir l'annuler
+            nextRoundTimeoutId = setTimeout(nextRound,1000);
+        }
+
+        function triggerFailure(isWrongNote, notePlayed){
+            isDetecting=!1;
+            clearTimeout(logicTimeoutId);
+            let reason = isWrongNote ? `Erreur (${notePlayed})` : "Temps écoulé";
+
+            displayBox.classList.add("failure");
+
+            if(currentMode === "survival") {
+                detectedText.textContent="GAME OVER";
+                gameHistory.push({note:currentTargetNote,result:!1,pts:0,reason:reason});
+                nextRoundTimeoutId = setTimeout(endGame, 1500);
+            } else {
+                detectedText.textContent = isWrongNote ? `RATE ! (${notePlayed})` : "TROP LENT !";
+                gameHistory.push({note:currentTargetNote,result:!1,pts:0,reason:reason});
+                nextRoundTimeoutId = setTimeout(nextRound, 1500);
+            }
+        }
+
+        function endGame(){
+            isRunning=!1;
+            if(pitchLoopId) cancelAnimationFrame(pitchLoopId);
+            resetGameUI(!1);
+
+            if(currentMode === 'training') return; // Pas d'écran de fin en training
+
+            const isNewRecord = saveRecord(totalScore);
+            document.getElementById("endTitle").textContent = currentMode==="survival"?"GAME OVER":"Session terminée";
+            document.getElementById("finalTotalScore").textContent = totalScore;
+            document.getElementById("newRecordMsg").style.display = isNewRecord?"block":"none";
+
+            const t=document.getElementById("historyList");
+            t.innerHTML="";
+            gameHistory.forEach(((e,n)=>{const o=document.createElement("div");o.className=`history-item ${e.result?"ok":"nok"}`;let r=e.result?"✅":`<span style="font-size:0.8em">${e.reason}</span> ❌`;o.innerHTML=`<span>#${n+1} - ${e.note}</span> ${r}`,t.appendChild(o)}));
+
+            gameUI.style.display="none";
+            summaryUI.style.display="block";
+        }
+
+        function resetGameUI(fullReset=!0){
+            isRunning=!1;
+            isDetecting=!1;
+
+            // On tue tous les délais en cours
+            clearTimeout(logicTimeoutId);
+            clearTimeout(nextRoundTimeoutId);
+            cancelAnimationFrame(timerAnimationId);
+
+            toggleBtn.textContent="Activer Micro & Jouer";
+            toggleBtn.classList.remove("active");
+            controlsBlock.style.opacity="1";
+            controlsBlock.style.pointerEvents="all";
+
+            displayBox.classList.remove("success","failure");
+            progressBar.style.width="0%";
+            lockFillOk.style.width="0%";
+            lockFillBad.style.width="0%";
+
+            if(fullReset){
+                noteTarget.textContent="?";
+                liveScore.textContent="Score: 0";
+                if(currentMode==="session") counterText.textContent="1 / 10";
+                else if(currentMode==="training") counterText.textContent="Série : 0";
+                else counterText.textContent="Survie";
+
+                detectedText.textContent="En attente...";
+            }
+            updateRecordDisplay();
+        }
+
+        document.getElementById("restartBtn").addEventListener("click",(()=>{summaryUI.style.display="none",gameUI.style.display="block",resetGameUI(!0)}));
+
+        // Algorithmes audio
+        function autoCorrelate(e,t){let n=e.length,o=0;for(let t=0;t<n;t++){let r=e[t];o+=r*r}if(o=Math.sqrt(o/n),o<.015)return-1;let r=0,c=n-1;for(let t=0;t<n/2;t++)if(Math.abs(e[t])<.2){r=t;break}for(let t=1;t<n/2;t++)if(Math.abs(e[n-t])<.2){c=n-t;break}e=e.slice(r,c),n=e.length;let a=new Array(n).fill(0);for(let t=0;t<n;t++)for(let o=0;o<n-t;o++)a[t]=a[t]+e[o]*e[o+t];let l=0;for(;a[l]>a[l+1];)l++;let i=-1,u=-1;for(let e=l;e<n;e++)a[e]>i&&(i=a[e],u=e);return t/u}
+        function getNoteIndexFromFreq(e){return Math.round(12*(Math.log(e/440)/Math.log(2)))+69}
+    </script>
+</body>
+</html>

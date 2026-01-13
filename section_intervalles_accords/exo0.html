@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo 0 : Le Cycle Chromatique</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --secondary: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text-main: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+        }
+
+        .nav-btn {
+            position: absolute; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px; border-radius: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center; max-width: 600px; width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* HEADER */
+        .score-display {
+            font-size: 1.1rem; color: #94a3b8; font-weight: 700; margin-bottom: 30px;
+            display: flex; justify-content: space-between;
+        }
+        .streak { color: var(--primary-light); }
+
+        /* QUESTION CARD */
+        .question-box {
+            background: rgba(0,0,0,0.2);
+            padding: 30px; border-radius: 20px;
+            margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .direction-label {
+            font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 15px; display: block; color: #cbd5e1;
+        }
+
+        .note-target {
+            font-size: 5rem; font-weight: 900; line-height: 1;
+            color: white;
+            text-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+        }
+
+        /* GRILLE REPONSES */
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 colonnes */
+            gap: 12px;
+        }
+        @media (max-width: 500px) { .answers-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .note-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 0; border-radius: 12px;
+            color: white; font-weight: 700; font-size: 1.1rem;
+            cursor: pointer; transition: all 0.1s;
+        }
+
+        .note-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); border-color: var(--primary); }
+        .note-btn:active { transform: scale(0.95); }
+
+        /* Feedback visual */
+        .note-btn.correct { background: var(--success) !important; border-color: var(--success); box-shadow: 0 0 15px var(--success); }
+        .note-btn.wrong { background: var(--danger) !important; border-color: var(--danger); opacity: 0.5; }
+
+        /* SWITCH TOGGLE */
+        .config-bar {
+            display: flex; justify-content: center; align-items: center; gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .switch-label { font-weight: bold; color: #cbd5e1; font-size: 0.9rem; }
+
+        .switch {
+            position: relative; display: inline-block; width: 50px; height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #334155; transition: .4s; border-radius: 34px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px;
+            left: 3px; bottom: 3px; background-color: white;
+            transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
+
+    <div class="container">
+
+        <div class="score-display">
+            <span>Score: <span id="scoreVal">0</span></span>
+            <span class="streak">Série: <span id="streakVal">0</span></span>
+        </div>
+
+        <div class="config-bar">
+            <span class="switch-label">Notes Naturelles</span>
+            <label class="switch">
+                <input type="checkbox" id="alterationToggle" onchange="toggleMode()">
+                <span class="slider"></span>
+            </label>
+            <span class="switch-label">Chromatiques (+ Dièses)</span>
+        </div>
+
+        <div class="question-box">
+            <span class="direction-label" id="directionText">Quelle note vient APRES</span>
+            <div class="note-target" id="targetNote">Do</div>
+        </div>
+
+        <div class="answers-grid" id="answersGrid">
+            </div>
+
+    </div>
+
+<script>
+    // --- DATA ---
+    const chromaticNotes = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+    const naturalNotes = ["Do", "Ré", "Mi", "Fa", "Sol", "La", "Si"];
+
+    // --- STATE ---
+    let activeNotes = naturalNotes; // On commence par facile (Naturelles)
+    let currentNoteIndex = 0;
+    let currentDirection = 1;
+    let score = 0;
+    let streak = 0;
+    let isProcessing = false;
+
+    // --- DOM ---
+    const directionText = document.getElementById('directionText');
+    const targetNote = document.getElementById('targetNote');
+    const answersGrid = document.getElementById('answersGrid');
+    const scoreVal = document.getElementById('scoreVal');
+    const streakVal = document.getElementById('streakVal');
+    const alterationToggle = document.getElementById('alterationToggle');
+
+    function init() {
+        // Initialiser l'état du switch (au cas où le navigateur garde la coche)
+        toggleMode(false); // false = ne pas relancer nextQuestion tout de suite
+        nextQuestion();
+    }
+
+    function toggleMode(refresh = true) {
+        if (alterationToggle.checked) {
+            activeNotes = chromaticNotes;
+        } else {
+            activeNotes = naturalNotes;
+        }
+
+        // Si on change de mode, on réinitialise la série et on change la question
+        if(refresh) {
+            streak = 0;
+            updateScore();
+            nextQuestion();
+        }
+    }
+
+    function generateGrid() {
+        answersGrid.innerHTML = '';
+
+        // On prépare les données : Nom + Index dans le tableau ACTIF
+        let shuffled = activeNotes.map((name, i) => ({ name: name, originalIndex: i }));
+
+        // Mélange
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+
+        // Création des boutons
+        shuffled.forEach(item => {
+            let btn = document.createElement('div');
+            btn.className = 'note-btn';
+            btn.textContent = item.name;
+            btn.onclick = () => checkAnswer(item.originalIndex, btn);
+            answersGrid.appendChild(btn);
+        });
+    }
+
+    function nextQuestion() {
+        isProcessing = false;
+        generateGrid(); // Régénère la grille selon le mode actif
+
+        // Choisir une note au hasard dans le tableau ACTIF
+        currentNoteIndex = Math.floor(Math.random() * activeNotes.length);
+
+        currentDirection = Math.random() > 0.5 ? 1 : -1;
+
+        // Affichage
+        targetNote.textContent = activeNotes[currentNoteIndex];
+
+        if(currentDirection === 1) {
+            directionText.textContent = "Quelle note vient juste APRÈS ?";
+            directionText.style.color = "#a78bfa";
+        } else {
+            directionText.textContent = "Quelle note vient juste AVANT ?";
+            directionText.style.color = "#f472b6";
+        }
+    }
+
+    function checkAnswer(clickedIndex, btnElement) {
+        if(isProcessing) return;
+        isProcessing = true;
+
+        // Calcul dynamique selon la taille du tableau (7 ou 12)
+        let len = activeNotes.length;
+        let correctIndex = (currentNoteIndex + currentDirection + len) % len;
+
+        if(clickedIndex === correctIndex) {
+            // BRAVO
+            btnElement.classList.add('correct');
+            score++;
+            streak++;
+            updateScore();
+            setTimeout(nextQuestion, 400);
+        } else {
+            // RATE
+            btnElement.classList.add('wrong');
+            streak = 0;
+            updateScore();
+
+            // Correction
+            let correctName = activeNotes[correctIndex];
+            Array.from(answersGrid.children).forEach(btn => {
+                if(btn.textContent === correctName) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            setTimeout(nextQuestion, 1500);
+        }
+    }
+
+    function updateScore() {
+        scoreVal.textContent = score;
+        streakVal.textContent = streak;
+    }
+
+    init();
+</script>
+</body>
+</html>
