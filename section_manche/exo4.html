@@ -302,8 +302,8 @@
     const clickLayer = document.getElementById('clickLayer');
     const solveBtn = document.getElementById('solveBtn');
     const nextBtn = document.getElementById('nextBtn');
-    const recordDisplay = document.getElementById('recordDisplay'); // <-- AJOUT
-    const RECORD_KEY_PREFIX = "guitar_exo4_note_"; // Préfixe pour localStorage
+    const recordDisplay = document.getElementById('recordDisplay');
+    const RECORD_KEY_PREFIX = "guitar_exo4_note_";
 
     function startTimer() {
         clearInterval(timerInterval);
@@ -382,6 +382,8 @@
         // Nouvelle note au hasard (uniquement naturelles pour commencer ? Non, tout.)
         currentTargetIndex = Math.floor(Math.random() * 12);
 
+        loadRecord();
+
         // Calcul du nombre total de cette note sur les 12 premières cases
         calculateTotalOccurrences();
 
@@ -440,34 +442,28 @@
         }
     }
 
+
+    // --- GESTION DES RECORDS PAR NOTE ---
     function loadRecord() {
-        // On cherche le record spécifique à la note en cours (currentTargetIndex)
         let key = RECORD_KEY_PREFIX + currentTargetIndex;
         let bestTime = localStorage.getItem(key);
-
-        if (bestTime) {
-            recordDisplay.textContent = "🏆 " + formatTime(parseInt(bestTime));
-        } else {
-            recordDisplay.textContent = "🏆 --:--";
-        }
-        recordDisplay.style.color = "#fbbf24"; // Reset couleur (si c'était "Nouveau record")
+        recordDisplay.classList.remove('new-record');
+        recordDisplay.style.color = "#fbbf24";
+        if (bestTime) { recordDisplay.textContent = "🏆 " + formatTime(parseInt(bestTime));
+        } else { recordDisplay.textContent = "🏆 --:--"; }
     }
 
     function checkRecord(finalTimeMs) {
         let key = RECORD_KEY_PREFIX + currentTargetIndex;
         let currentBest = localStorage.getItem(key);
-
-        // Si pas de record OU si on a fait mieux (temps plus petit)
         if (!currentBest || finalTimeMs < parseInt(currentBest)) {
             localStorage.setItem(key, finalTimeMs);
             recordDisplay.textContent = "🏆 " + formatTime(finalTimeMs) + " (Record !)";
-            recordDisplay.style.color = "#fff"; // Flash blanc ou autre effet
-            return true;
+            recordDisplay.classList.add('new-record'); // Effet visuel
         }
-        return false;
     }
 
-    function victory() {
+function victory() {
         stopTimer();
         let finalTimeMs = Date.now() - startTime;
         isRoundActive = false;
