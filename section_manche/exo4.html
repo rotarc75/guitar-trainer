@@ -372,23 +372,22 @@
     }
 
     function nextRound() {
-        // Nettoyage
+        // Nettoyage visuel
         document.querySelectorAll('.dot').forEach(d => d.remove());
         foundPositions = [];
         foundOccurrences = 0;
         isRoundActive = true;
         solveBtn.disabled = false;
-        targetNameEl.style.color = "var(--primary)";
 
-        // Nouvelle note au hasard (uniquement naturelles pour commencer ? Non, tout.)
+        // IMPORTANT : On remet la couleur normale (violet) du titre
+        targetNameEl.style.color = "#8b5cf6";
+
+        // Nouvelle note et chargement du record
         currentTargetIndex = Math.floor(Math.random() * 12);
-
         loadRecord();
-
-        // Calcul du nombre total de cette note sur les 12 premières cases
         calculateTotalOccurrences();
 
-        // UI
+        // Mise à jour UI
         targetNameEl.textContent = noteNames[currentTargetIndex];
         foundCountEl.textContent = "0";
         totalCountEl.textContent = totalOccurrences;
@@ -437,9 +436,14 @@
     function defeat() {
         stopTimer();
         isRoundActive = false;
+
+        // Feedback visuel : Texte rouge et message Perdu
         targetNameEl.textContent = "Perdu ! ☠️";
-        targetNameEl.style.color = "#ef4444"; // Rouge (var(--danger))
+        targetNameEl.style.color = "#ef4444";
+
         solveBtn.disabled = true;
+
+        // On montre automatiquement la correction
         showCorrection();
     }
 
@@ -474,7 +478,7 @@
         }
     }
 
-function victory() {
+    function victory() {
         stopTimer();
         let finalTimeMs = Date.now() - startTime;
         isRoundActive = false;
