@@ -378,6 +378,7 @@
         foundOccurrences = 0;
         isRoundActive = true;
         solveBtn.disabled = false;
+        targetNameEl.style.color = "var(--primary)";
 
         // Nouvelle note au hasard (uniquement naturelles pour commencer ? Non, tout.)
         currentTargetIndex = Math.floor(Math.random() * 12);
@@ -428,8 +429,18 @@
             }
         } else {
             // FAUX
-            addDot(zone, 'wrong', true); // true = temporaire
+            addDot(zone, 'wrong', false);
+            defeat();
         }
+    }
+
+    function defeat() {
+        stopTimer();
+        isRoundActive = false;
+        targetNameEl.textContent = "Perdu ! ☠️";
+        targetNameEl.style.color = "#ef4444"; // Rouge (var(--danger))
+        solveBtn.disabled = true;
+        showCorrection();
     }
 
     function addDot(container, type, isTemporary = false) {
