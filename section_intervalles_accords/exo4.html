@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo 4 : Le Détective</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --secondary: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text-main: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+        }
+
+        .nav-btn {
+            position: absolute; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px; border-radius: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center; max-width: 600px; width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* CONSIGNE (NOUVEAU) */
+        .rule-box {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 15px; padding: 10px 20px;
+            margin-bottom: 25px; display: inline-block;
+            color: #e2e8f0; font-size: 0.95rem;
+        }
+        .rule-icon { margin-right: 8px; font-style: normal; }
+
+        .score-display {
+            font-size: 1.1rem; color: #94a3b8; font-weight: 700; margin-bottom: 20px;
+            display: flex; justify-content: space-between;
+        }
+        .streak { color: var(--primary-light); }
+
+        /* INDICES */
+        .clue-box {
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);
+            padding: 30px; border-radius: 20px; margin-bottom: 30px;
+        }
+
+        .notes-display {
+            display: flex; justify-content: center; gap: 15px; font-weight: 900;
+        }
+        .note-bubble {
+            background: white; color: var(--secondary);
+            width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        /* REPONSES */
+        .choices-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+        }
+
+        .choice-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px; border-radius: 15px; color: white;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.2s;
+        }
+        .choice-btn:hover { background: rgba(255,255,255,0.15); border-color: var(--primary); }
+
+        .choice-btn.correct { background: var(--success); border-color: var(--success); }
+        .choice-btn.wrong { background: var(--danger); opacity: 0.5; }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
+
+    <div class="container">
+        <div class="score-display">
+            <span>Score: <span id="scoreVal">0</span></span>
+            <span class="streak">Série: <span id="streakVal">0</span></span>
+        </div>
+
+        <div class="rule-box">
+            <span class="rule-icon">🕵️</span>
+            Analyse les notes et trouve le nom de l'accord.
+        </div>
+
+        <div class="clue-box">
+            <div class="notes-display" id="notesDisplay"></div>
+        </div>
+
+        <div class="choices-grid" id="choicesGrid"></div>
+    </div>
+
+<script>
+    const notesNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+    const formulas = [
+        { name: "Majeur", intervals: [0, 4, 7] },
+        { name: "Mineur", intervals: [0, 3, 7] },
+        { name: "Diminué", intervals: [0, 3, 6] }
+    ];
+
+    let currentRoot = 0;
+    let currentFormula = null;
+    let score = 0;
+    let streak = 0;
+    let isProcessing = false;
+
+    const notesDisplay = document.getElementById('notesDisplay');
+    const choicesGrid = document.getElementById('choicesGrid');
+    const scoreVal = document.getElementById('scoreVal');
+    const streakVal = document.getElementById('streakVal');
+
+    function init() {
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        isProcessing = false;
+        choicesGrid.innerHTML = '';
+        notesDisplay.innerHTML = '';
+
+        currentRoot = Math.floor(Math.random() * 12);
+        currentFormula = formulas[Math.floor(Math.random() * formulas.length)];
+
+        let chordNotesIndices = currentFormula.intervals.map(i => (currentRoot + i) % 12);
+
+        chordNotesIndices.forEach(i => {
+            let bubble = document.createElement('div');
+            bubble.className = 'note-bubble';
+            bubble.textContent = notesNames[i];
+            notesDisplay.appendChild(bubble);
+        });
+
+        let correctAnswer = {
+            text: notesNames[currentRoot] + " " + currentFormula.name,
+            isCorrect: true
+        };
+
+        let options = [correctAnswer];
+
+        while(options.length < 4) {
+            let rRoot = Math.floor(Math.random() * 12);
+            let rForm = formulas[Math.floor(Math.random() * formulas.length)];
+            let text = notesNames[rRoot] + " " + rForm.name;
+
+            if(!options.find(o => o.text === text)) {
+                options.push({ text: text, isCorrect: false });
+            }
+        }
+
+        options.sort(() => Math.random() - 0.5);
+
+        options.forEach(opt => {
+            let btn = document.createElement('div');
+            btn.className = 'choice-btn';
+            btn.textContent = opt.text;
+            btn.onclick = () => checkAnswer(opt, btn);
+            choicesGrid.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(option, btn) {
+        if(isProcessing) return;
+        isProcessing = true;
+
+        if(option.isCorrect) {
+            btn.classList.add('correct');
+            score++; streak++; updateScore();
+            setTimeout(nextQuestion, 600);
+        } else {
+            btn.classList.add('wrong');
+            streak = 0; updateScore();
+            Array.from(choicesGrid.children).forEach(b => {
+                if(b.textContent.includes(notesNames[currentRoot] + " " + currentFormula.name)) {
+                    b.classList.add('correct');
+                }
+            });
+            setTimeout(nextQuestion, 2000);
+        }
+    }
+
+    function updateScore() {
+        scoreVal.textContent = score;
+        streakVal.textContent = streak;
+    }
+
+    init();
+</script>
+</body>
+</html>

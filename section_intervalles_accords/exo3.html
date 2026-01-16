@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo 3 : Le Chimiste</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --secondary: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text-main: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+        }
+
+        .nav-btn {
+            position: absolute; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px; border-radius: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center; max-width: 700px; width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* CONSIGNE (NOUVEAU) */
+        .rule-box {
+            background: rgba(139, 92, 246, 0.1); /* Violet très léger */
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 15px; padding: 10px 20px;
+            margin-bottom: 25px; display: inline-block;
+            color: #e2e8f0; font-size: 0.95rem;
+        }
+        .rule-icon { margin-right: 8px; font-style: normal; }
+
+        /* HEADER */
+        .score-display {
+            font-size: 1.1rem; color: #94a3b8; font-weight: 700; margin-bottom: 20px;
+            display: flex; justify-content: space-between;
+        }
+        .streak { color: var(--primary-light); }
+
+        /* QUESTION */
+        .question-box {
+            background: rgba(0,0,0,0.2);
+            padding: 30px; border-radius: 20px;
+            margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .label { color: #cbd5e1; font-size: 1.2rem; margin-bottom: 10px; display: block; }
+
+        .chord-name {
+            font-size: 3rem; font-weight: 900; color: white;
+            text-shadow: 0 0 25px rgba(139, 92, 246, 0.5);
+        }
+        .chord-type { color: var(--primary-light); font-weight: 300; }
+
+        /* GRILLE DE NOTES */
+        .answers-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 30px;
+        }
+        @media (max-width: 500px) { .answers-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .note-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 0; border-radius: 12px; color: white; font-weight: 700;
+            cursor: pointer; transition: all 0.1s; user-select: none;
+        }
+        .note-btn:hover { background: rgba(255,255,255,0.15); }
+
+        .note-btn.selected {
+            background: var(--primary); border-color: var(--primary-light);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); transform: translateY(-2px);
+        }
+
+        .note-btn.correct { background: var(--success) !important; border-color: var(--success); }
+        .note-btn.missed { border: 2px dashed var(--success); opacity: 0.7; }
+        .note-btn.wrong { background: var(--danger) !important; opacity: 0.5; }
+
+        /* BOUTON VALIDER */
+        .validate-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold;
+            border-radius: 50px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 20px -5px rgba(124, 58, 237, 0.4);
+        }
+        .validate-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(124, 58, 237, 0.5); }
+        .validate-btn:active { transform: scale(0.95); }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
+
+    <div class="container">
+        <div class="score-display">
+            <span>Score: <span id="scoreVal">0</span></span>
+            <span class="streak">Série: <span id="streakVal">0</span></span>
+        </div>
+
+        <div class="rule-box">
+            <span class="rule-icon">🧪</span>
+            Sélectionne les notes qui composent l'accord.
+        </div>
+
+        <div class="question-box">
+            <div class="chord-name">
+                <span id="qRoot">Do</span> <span id="qType" class="chord-type">Majeur</span>
+            </div>
+        </div>
+
+        <div class="answers-grid" id="notesGrid"></div>
+
+        <button class="validate-btn" onclick="validate()">Valider</button>
+    </div>
+
+<script>
+    const notes = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+
+    const formulas = [
+        { name: "Majeur", intervals: [0, 4, 7] },
+        { name: "Mineur", intervals: [0, 3, 7] },
+        { name: "Sus2", intervals: [0, 2, 7] },
+        { name: "Sus4", intervals: [0, 5, 7] },
+        { name: "Diminué", intervals: [0, 3, 6] }
+    ];
+
+    let currentRoot = 0;
+    let currentFormula = null;
+    let selectedIndices = [];
+    let score = 0;
+    let streak = 0;
+    let isProcessing = false;
+
+    const qRoot = document.getElementById('qRoot');
+    const qType = document.getElementById('qType');
+    const grid = document.getElementById('notesGrid');
+    const scoreVal = document.getElementById('scoreVal');
+    const streakVal = document.getElementById('streakVal');
+
+    function init() {
+        grid.innerHTML = '';
+        notes.forEach((note, i) => {
+            let btn = document.createElement('div');
+            btn.className = 'note-btn';
+            btn.textContent = note;
+            btn.onclick = () => toggleNote(i, btn);
+            grid.appendChild(btn);
+        });
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        isProcessing = false;
+        selectedIndices = [];
+
+        document.querySelectorAll('.note-btn').forEach(btn => {
+            btn.className = 'note-btn';
+        });
+
+        currentRoot = Math.floor(Math.random() * 12);
+        currentFormula = formulas[Math.floor(Math.random() * formulas.length)];
+
+        qRoot.textContent = notes[currentRoot];
+        qType.textContent = currentFormula.name;
+    }
+
+    function toggleNote(index, btn) {
+        if(isProcessing) return;
+
+        if(selectedIndices.includes(index)) {
+            selectedIndices = selectedIndices.filter(i => i !== index);
+            btn.classList.remove('selected');
+        } else {
+            selectedIndices.push(index);
+            btn.classList.add('selected');
+        }
+    }
+
+    function validate() {
+        if(isProcessing) return;
+        isProcessing = true;
+
+        let correctIndices = currentFormula.intervals.map(interval => (currentRoot + interval) % 12);
+        selectedIndices.sort((a,b) => a-b);
+        correctIndices.sort((a,b) => a-b);
+
+        let isCorrect = JSON.stringify(selectedIndices) === JSON.stringify(correctIndices);
+        let allBtns = document.querySelectorAll('.note-btn');
+
+        if(isCorrect) {
+            score++; streak++; updateScore();
+            selectedIndices.forEach(i => allBtns[i].classList.add('correct'));
+            setTimeout(nextQuestion, 1000);
+        } else {
+            streak = 0; updateScore();
+            allBtns.forEach((btn, i) => {
+                if(selectedIndices.includes(i) && !correctIndices.includes(i)) btn.classList.add('wrong');
+                if(correctIndices.includes(i)) {
+                    if(selectedIndices.includes(i)) btn.classList.add('correct');
+                    else btn.classList.add('missed');
+                }
+            });
+            setTimeout(nextQuestion, 2500);
+        }
+    }
+
+    function updateScore() {
+        scoreVal.textContent = score;
+        streakVal.textContent = streak;
+    }
+
+    init();
+</script>
+</body>
+</html>
