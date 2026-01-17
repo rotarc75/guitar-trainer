@@ -3,275 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accordeur Pro</title>
+    <title>Accordeur Chromatique</title>
     <style>
         :root {
             --primary: #8b5cf6;
             --success: #10b981;
             --danger: #ef4444;
-            --secondary: #1e293b;
-            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.9);
             --text-main: #f1f5f9;
         }
 
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-dark);
-            background-image:
+            background:
                 radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
-                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%);
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
             color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+            overflow: hidden;
         }
 
-        /* NAVIGATION */
-        .nav-back {
-            position: absolute; top: 20px; left: 20px;
-            text-decoration: none; color: rgba(255,255,255,0.7);
-            padding: 10px 20px; border-radius: 30px;
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s;
+        .nav-btn {
+            position: absolute; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+            z-index: 10;
         }
-        .nav-back:hover { background: rgba(255,255,255,0.15); color: white; }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
 
-        /* BOITE PRINCIPALE */
-        .tuner-container {
-            background: rgba(30, 41, 59, 0.6);
-            padding: 40px; border-radius: 40px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.5);
-            text-align: center; width: 350px;
+        .tuner-body {
+            position: relative;
+            width: 350px;
+            height: 400px;
+            background: var(--card-bg);
+            border-radius: 40px;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 40px;
         }
 
-        /* AFFICHAGE NOTE */
+        /* NOTE DISPLAY */
         .note-display {
             font-size: 6rem; font-weight: 900;
-            color: var(--text-main);
-            margin: 10px 0;
+            color: #94a3b8; /* Gris par défaut */
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
             height: 120px; line-height: 120px;
-            text-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
-        }
-        .note-display.in-tune { color: var(--success); text-shadow: 0 0 40px var(--success); }
-
-        .frequency { font-family: monospace; color: #94a3b8; font-size: 1.2rem; margin-bottom: 30px; }
-
-        /* JAUGE (Aiguille) */
-        .gauge-wrapper {
-            position: relative; width: 100%; height: 20px;
-            background: #334155; border-radius: 10px;
-            margin: 20px 0 40px 0; overflow: hidden;
+            transition: color 0.2s;
         }
 
-        .center-line {
-            position: absolute; left: 50%; top: 0; bottom: 0;
-            width: 2px; background: rgba(255,255,255,0.2);
-            transform: translateX(-50%); z-index: 1;
+        .note-display.in-tune { color: var(--success); text-shadow: 0 0 30px var(--success); }
+        .note-display.active { color: white; }
+
+        .frequency-display {
+            font-family: 'Courier New', monospace;
+            color: #cbd5e1; font-size: 1.2rem; margin-bottom: 20px; opacity: 0.7;
         }
 
-        .needle {
-            position: absolute; top: 0; bottom: 0; width: 6px;
-            background: var(--danger); border-radius: 3px;
-            left: 50%; transform: translateX(-50%);
-            transition: left 0.1s linear, background-color 0.2s;
-            box-shadow: 0 0 10px var(--danger);
+        /* GAUGE CANVAS */
+        canvas { margin-top: 10px; }
+
+        /* INDICATORS */
+        .indicators {
+            display: flex; justify-content: space-between; width: 100%; padding: 0 40px;
+            margin-top: 20px; font-weight: bold; color: #64748b;
         }
-        .needle.centered { background: var(--success); box-shadow: 0 0 15px var(--success); }
+        .flat { color: var(--danger); opacity: 0.3; }
+        .sharp { color: var(--danger); opacity: 0.3; }
 
-        /* INDICATEURS */
-        .indicators { display: flex; justify-content: space-between; font-weight: bold; color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-top: -30px; margin-bottom: 30px;}
+        .flat.active { opacity: 1; text-shadow: 0 0 15px var(--danger); }
+        .sharp.active { opacity: 1; text-shadow: 0 0 15px var(--danger); }
 
-        /* BOUTON START */
-        .btn-start {
-            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
-            border: none; color: white; padding: 15px 40px;
-            border-radius: 50px; font-size: 1.1rem; font-weight: bold;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
+        /* START BUTTON */
+        .start-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 40px; z-index: 50; transition: opacity 0.5s;
         }
-        .btn-start:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(139, 92, 246, 0.5); }
-        .btn-start:active { transform: scale(0.98); }
 
-        /* STATUS MICRO */
-        .mic-status { margin-top: 20px; font-size: 0.9rem; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 8px;}
-        .dot { width: 8px; height: 8px; background: #475569; border-radius: 50%; }
-        .dot.active { background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
+        .start-btn {
+            background: var(--primary); color: white; border: none;
+            padding: 20px 40px; font-size: 1.5rem; font-weight: bold; border-radius: 50px;
+            cursor: pointer; box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+            transition: transform 0.2s;
+        }
+        .start-btn:hover { transform: scale(1.05); }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .sensitivity-control {
+            margin-top: 25px;
+            width: 80%;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .sensitivity-control label {
+            color: #94a3b8; font-size: 0.9rem; margin-bottom: 10px; font-weight: bold;
+        }
+        .sensitivity-control input[type=range] {
+            width: 100%; accent-color: var(--primary); cursor: pointer;
+        }
 
     </style>
 </head>
 <body>
 
-    <a href="../section_outils.html" class="nav-back">← Retour</a>
+    <a href="../section_outils.html" class="nav-btn">← Accueil</a>
 
-    <div class="tuner-container">
-        <h2 style="margin:0; color:#cbd5e1; font-weight:600">Accordeur</h2>
+    <div class="tuner-body">
 
-        <div class="note-display" id="noteDisplay">--</div>
-        <div class="frequency" id="freqDisplay">0.0 Hz</div>
+        <div class="note-display" id="noteName">-</div>
+        <div class="frequency-display"><span id="freqValue">0.0</span> Hz</div>
 
-        <div class="gauge-wrapper">
-            <div class="center-line"></div>
-            <div class="needle" id="needle"></div>
-        </div>
+        <canvas id="tunerCanvas" width="300" height="150"></canvas>
 
         <div class="indicators">
-            <span>♭ Trop Bas</span>
-            <span>Trop Haut ♯</span>
+            <span id="flatInd" class="flat">♭ TROP GRAVE</span>
+            <span id="sharpInd" class="sharp">TROP AIGU ♯</span>
         </div>
 
-        <button class="btn-start" id="startBtn" onclick="startTuner()">Activer le Micro</button>
+        <div class="sensitivity-control">
+            <label>Seuil de bruit (Noise Gate)</label>
+            <input type="range" id="sensGate" min="1" max="30" value="10">
+        </div>
 
-        <div class="mic-status">
-            <div class="dot" id="micDot"></div>
-            <span id="statusText">Micro désactivé</span>
+        <div class="start-overlay" id="overlay">
+            <button class="start-btn" onclick="startTuner()">Activer le Micro 🎙️</button>
         </div>
     </div>
 
 <script>
-    // --- AUDIO & LOGIC ---
+    // --- AUDIO CONTEXT & VARIABLES ---
     let audioContext = null;
     let analyser = null;
+    let mediaStreamSource = null;
+    let bufferLength = 2048; // Taille du buffer pour l'analyse (Plus c'est grand, mieux c'est pour les basses)
+    let dataBuffer = null;
     let isRunning = false;
+
+    // --- DOM ELEMENTS ---
+    const noteNameEl = document.getElementById('noteName');
+    const freqValueEl = document.getElementById('freqValue');
+    const flatInd = document.getElementById('flatInd');
+    const sharpInd = document.getElementById('sharpInd');
+    const canvas = document.getElementById('tunerCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // --- CONSTANTES MUSICALES ---
     const noteStrings = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
 
-    const noteDisplay = document.getElementById('noteDisplay');
-    const freqDisplay = document.getElementById('freqDisplay');
-    const needle = document.getElementById('needle');
-    const startBtn = document.getElementById('startBtn');
-    const micDot = document.getElementById('micDot');
-    const statusText = document.getElementById('statusText');
+    // --- ETAT VISUEL ---
+    let currentCents = 0; // Déviation actuelle
+    let displayCents = 0; // Pour l'animation lissée
 
     async function startTuner() {
-        if (isRunning) return;
-
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const source = audioContext.createMediaStreamSource(stream);
 
+            // Demander l'accès au micro
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            mediaStreamSource = audioContext.createMediaStreamSource(stream);
             analyser = audioContext.createAnalyser();
-            analyser.fftSize = 2048;
-            source.connect(analyser);
+            analyser.fftSize = bufferLength;
+
+            mediaStreamSource.connect(analyser);
+
+            dataBuffer = new Float32Array(bufferLength);
+
+            document.getElementById('overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('overlay').style.display = 'none', 500);
 
             isRunning = true;
-            startBtn.style.display = 'none'; // Cache le bouton une fois lancé
-            micDot.classList.add('active');
-            statusText.textContent = "Écoute en cours...";
-
             updatePitch();
         } catch (err) {
-            alert("Impossible d'accéder au micro. Vérifiez vos permissions.");
+            alert("Erreur: Impossible d'accéder au micro. Vérifie tes permissions !");
             console.error(err);
         }
     }
 
-    let lastNoteTime = 0; // Mémoire anti-clignotement
-
-    function updatePitch() {
-        if (!isRunning) return;
-
-        const bufferLength = analyser.fftSize;
-        const buffer = new Float32Array(bufferLength);
-        analyser.getFloatTimeDomainData(buffer);
-
-        const frequency = autoCorrelate(buffer, audioContext.sampleRate);
-
-        if (frequency === -1) {
-            // SILENCE DÉTECTÉ
-            // On attend 500ms (demi-seconde) avant de cacher l'aiguille.
-            // Ça permet de lisser les micro-coupures quand tu joues.
-            if (Date.now() - lastNoteTime > 500) {
-                noteDisplay.style.opacity = "0.3";
-                freqDisplay.textContent = "...";
-                needle.style.opacity = "0";
-            }
-        } else {
-            // NOTE DÉTECTÉE
-            lastNoteTime = Date.now(); // On rafraîchit le chrono
-
-            noteDisplay.style.opacity = "1";
-            needle.style.opacity = "1";
-
-            const note = getNote(frequency);
-            const noteName = noteStrings[note % 12];
-
-            const idealFreq = 440 * Math.pow(2, (note - 69) / 12);
-            const cents = 1200 * Math.log2(frequency / idealFreq);
-
-            noteDisplay.textContent = noteName;
-            freqDisplay.textContent = frequency.toFixed(1) + " Hz";
-
-            updateNeedle(cents);
-        }
-
-        requestAnimationFrame(updatePitch);
-    }
-
-    function updateNeedle(cents) {
-        // Limiter l'affichage à +/- 50 cents
-        let clampCents = Math.max(-50, Math.min(50, cents));
-
-        // Convertir -50..50 en pourcentage 0..100% (50% = centre)
-        const percent = ((clampCents + 50) / 100) * 100;
-
-        needle.style.left = percent + "%";
-
-        // Feedback visuel si c'est juste (+/- 5 cents)
-        if (Math.abs(cents) < 5) {
-            needle.classList.add('centered');
-            noteDisplay.classList.add('in-tune');
-        } else {
-            needle.classList.remove('centered');
-            noteDisplay.classList.remove('in-tune');
-        }
-    }
-
-    // --- ALGORITHME DE DÉTECTION (AUTOCORRELATION) ---
-    // C'est la méthode la plus fiable pour un accordeur de guitare
+    // --- ALGORITHME D'AUTOCORRÉLATION ---
+    // --- ALGORITHME D'AUTOCORRÉLATION (CORRIGÉ) ---
     function autoCorrelate(buf, sampleRate) {
-        let SIZE = buf.length;
+        // 1. Calcul du RMS (Volume moyen du signal)
+        let size = buf.length;
         let rms = 0;
-
-        // 1. Calcul du volume (RMS)
-        for (let i = 0; i < SIZE; i++) {
+        for (let i = 0; i < size; i++) {
             let val = buf[i];
             rms += val * val;
         }
-        rms = Math.sqrt(rms / SIZE);
+        rms = Math.sqrt(rms / size);
 
-        // SEUIL VOLUME : 0.01 est un bon équilibre
-        if (rms < 0.01) return -1;
+        // --- GESTION DU BRUIT (NOISE GATE) ---
+        // On récupère la valeur du slider défini dans le HTML
+        // Si l'élément n'existe pas encore (chargement), on met une valeur par défaut
+        let sensitivityElement = document.getElementById('sensGate');
+        let sensitivityVal = sensitivityElement ? sensitivityElement.value : 10;
 
-        // 2. Recherche de fréquence
-        let r1 = 0, r2 = SIZE - 1, thres = 0.2;
-        for (let i = 0; i < SIZE / 2; i++) {
+        // On convertit la valeur (1-30) en seuil audio (0.001 - 0.030)
+        // Plus le slider est haut, plus le seuil est élevé (moins sensible)
+        let threshold = sensitivityVal / 1000;
+
+        // Si le volume est inférieur au seuil, on considère que c'est du silence
+        if (rms < threshold) return -1;
+        // -------------------------------------
+
+        // 2. Préparation du buffer (Trim pour éviter les erreurs de début/fin)
+        let r1 = 0, r2 = size - 1, thres = 0.2;
+
+        // On avance le début jusqu'à un signal significatif
+        for (let i = 0; i < size / 2; i++) {
             if (Math.abs(buf[i]) < thres) { r1 = i; break; }
         }
-        for (let i = 1; i < SIZE / 2; i++) {
-            if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+        // On recule la fin jusqu'à un signal significatif
+        for (let i = 1; i < size / 2; i++) {
+            if (Math.abs(buf[size - i]) < thres) { r2 = size - i; break; }
         }
 
         buf = buf.slice(r1, r2);
-        SIZE = buf.length;
+        size = buf.length;
 
-        let c = new Array(SIZE).fill(0);
-        for (let i = 0; i < SIZE; i++) {
-            for (let j = 0; j < SIZE - i; j++) {
+        // 3. Calcul de l'autocorrélation (Comparaison du signal avec lui-même)
+        let c = new Array(size).fill(0);
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size - i; j++) {
                 c[i] = c[i] + buf[j] * buf[j + i];
             }
         }
 
+        // 4. Recherche du pic (La période fondamentale)
         let d = 0;
+        // On ignore la première descente (le pic à 0 décalage)
         while (c[d] > c[d + 1]) d++;
+
         let maxval = -1, maxpos = -1;
-        for (let i = d; i < SIZE; i++) {
+        for (let i = d; i < size; i++) {
             if (c[i] > maxval) {
                 maxval = c[i];
                 maxpos = i;
@@ -279,25 +249,151 @@
         }
         let T0 = maxpos;
 
-        // SEUIL QUALITÉ : 0.8 filtre le bruit blanc mais garde la guitare
-        let correlationQuality = maxval / c[0];
-        if (correlationQuality < 0.8) return -1;
-
-        // Interpolation
+        // 5. Interpolation Parabolique (Pour une précision chirurgicale)
+        // Permet de trouver la fréquence exacte "entre" deux échantillons
         let x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
         let a = (x1 + x3 - 2 * x2) / 2;
         let b = (x3 - x1) / 2;
         if (a) T0 = T0 - b / (2 * a);
 
+        // Retourne la fréquence en Hz
         return sampleRate / T0;
     }
 
 
-    function getNote(frequency) {
+
+
+    // --- LOGIQUE MUSICALE ---
+    function noteFromPitch(frequency) {
         const noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
         return Math.round(noteNum) + 69;
     }
-</script>
 
+    function frequencyFromNoteNumber(note) {
+        return 440 * Math.pow(2, (note - 69) / 12);
+    }
+
+    function centsOffFromPitch(frequency, note) {
+        return Math.floor(1200 * Math.log(frequency / frequencyFromNoteNumber(note)) / Math.log(2));
+    }
+
+    // --- BOUCLE PRINCIPALE ---
+    function updatePitch() {
+        if (!isRunning) return;
+
+        analyser.getFloatTimeDomainData(dataBuffer);
+        let ac = autoCorrelate(dataBuffer, audioContext.sampleRate);
+
+        if (ac === -1) {
+            // Silence / Bruit -> On relaxe l'aiguille vers 0 doucement
+            // Mais on ne change pas la note affichée pour éviter que ça clignote
+            currentCents *= 0.9;
+            freqValueEl.style.opacity = 0.3;
+        } else {
+            freqValueEl.style.opacity = 1;
+            let note = noteFromPitch(ac);
+            let noteName = noteStrings[note % 12];
+
+            // Calculer l'écart (cents)
+            let detune = centsOffFromPitch(ac, note);
+
+            // Limiter l'écart à +/- 50 cents
+            if (detune === 0) detune = 0.1; // éviter division par 0
+
+            noteNameEl.textContent = noteName;
+            freqValueEl.textContent = Math.round(ac) + " Hz";
+
+            // Cible
+            currentCents = detune;
+
+            // Feedback visuel (Vert si proche de 0)
+            if (Math.abs(detune) < 5) {
+                noteNameEl.className = "note-display in-tune";
+                flatInd.className = "flat";
+                sharpInd.className = "sharp";
+            } else {
+                noteNameEl.className = "note-display active";
+                if(detune < 0) {
+                    flatInd.className = "flat active";
+                    sharpInd.className = "sharp";
+                } else {
+                    flatInd.className = "flat";
+                    sharpInd.className = "sharp active";
+                }
+            }
+        }
+
+        drawGauge();
+        requestAnimationFrame(updatePitch);
+    }
+
+    // --- DESSIN (CANVAS) ---
+    function drawGauge() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let centerX = canvas.width / 2;
+        let centerY = canvas.height - 20;
+        let radius = 100;
+
+        // Lissage de l'animation (Lerp)
+        displayCents += (currentCents - displayCents) * 0.1;
+
+        // 1. L'arc de fond
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI);
+        ctx.lineWidth = 15;
+        ctx.strokeStyle = "#334155";
+        ctx.stroke();
+
+        // 2. La zone "Juste" (Verte au milieu)
+        ctx.beginPath();
+        // Petit arc au milieu (-10 cents à +10 cents)
+        let greenStart = Math.PI + Math.PI/2 - 0.15;
+        let greenEnd = Math.PI + Math.PI/2 + 0.15;
+        ctx.arc(centerX, centerY, radius, greenStart, greenEnd);
+        ctx.strokeStyle = "rgba(16, 185, 129, 0.3)"; // Vert transparent
+        ctx.stroke();
+
+        // 3. Calcul de l'angle de l'aiguille
+        // -50 cents = 180deg (PI), +50 cents = 360deg (2PI)
+        // Mais on veut centrer sur PI + PI/2 (Haut)
+        let angle = Math.PI + (Math.PI / 2) + (displayCents * (Math.PI / 2) / 50);
+
+        // Limites visuelles
+        if (angle < Math.PI) angle = Math.PI;
+        if (angle > 2 * Math.PI) angle = 2 * Math.PI;
+
+        // 4. L'aiguille
+        let needleLen = radius - 10;
+        let needleX = centerX + needleLen * Math.cos(angle);
+        let needleY = centerY + needleLen * Math.sin(angle);
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(needleX, needleY);
+        ctx.lineWidth = 4;
+
+        // Couleur de l'aiguille
+        if(Math.abs(displayCents) < 5) {
+            ctx.strokeStyle = "#10b981"; // Vert
+            ctx.shadowColor = "#10b981";
+            ctx.shadowBlur = 15;
+        } else {
+            ctx.strokeStyle = "#ef4444"; // Rouge
+            ctx.shadowColor = "#ef4444";
+            ctx.shadowBlur = 10;
+        }
+
+        ctx.stroke();
+        ctx.shadowBlur = 0; // Reset
+
+        // 5. Point pivot
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+        ctx.fillStyle = "white";
+        ctx.fill();
+    }
+
+</script>
 </body>
 </html>
