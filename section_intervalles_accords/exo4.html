@@ -117,100 +117,134 @@
         <div class="choices-grid" id="choicesGrid"></div>
     </div>
 
+
+
 <script>
-    const notesNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
-    const formulas = [
-        { name: "Majeur", intervals: [0, 4, 7] },
-        { name: "Mineur", intervals: [0, 3, 7] },
-        { name: "Diminué", intervals: [0, 3, 6] }
-    ];
 
-    let currentRoot = 0;
-    let currentFormula = null;
-    let score = 0;
-    let streak = 0;
-    let isProcessing = false;
+const notesNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
 
-    const notesDisplay = document.getElementById('notesDisplay');
-    const choicesGrid = document.getElementById('choicesGrid');
-    const scoreVal = document.getElementById('scoreVal');
-    const streakVal = document.getElementById('streakVal');
+// LA LISTE COMPLÈTE ET ÉQUILIBRÉE
+const formulas = [
+    // --- NIVEAU 1 : Les Triades (3 notes) ---
+    { name: "Majeur", intervals: [0, 4, 7] },
+    { name: "Mineur", intervals: [0, 3, 7] },
+    { name: "Diminué", intervals: [0, 3, 6] },
+    { name: "Augmenté", intervals: [0, 4, 8] },
+    { name: "Sus2", intervals: [0, 2, 7] },
+    { name: "Sus4", intervals: [0, 5, 7] },
 
-    function init() {
-        nextQuestion();
+    // --- NIVEAU 2 : Les Tétrades (4 notes) ---
+    { name: "Majeur 7 (M7)", intervals: [0, 4, 7, 11] },    // Le "Joli"
+    { name: "Mineur 7 (m7)", intervals: [0, 3, 7, 10] },    // Le "Cool"
+    { name: "Dominante 7", intervals: [0, 4, 7, 10] },      // Le "Bluesy"
+    { name: "Demi-Diminué (Ø)", intervals: [0, 3, 6, 10] }  // Le "Jazzy" (m7b5)
+];
+
+let currentRoot = 0;
+let currentFormula = null;
+let score = 0;
+let streak = 0;
+let isProcessing = false;
+
+const notesDisplay = document.getElementById('notesDisplay');
+const choicesGrid = document.getElementById('choicesGrid');
+const scoreVal = document.getElementById('scoreVal');
+const streakVal = document.getElementById('streakVal');
+
+function init() {
+    nextQuestion();
+}
+
+function nextQuestion() {
+    isProcessing = false;
+    choicesGrid.innerHTML = '';
+    notesDisplay.innerHTML = '';
+
+    // 1. CHOIX DE LA QUESTION
+    currentRoot = Math.floor(Math.random() * 12);
+    currentFormula = formulas[Math.floor(Math.random() * formulas.length)];
+
+    // 2. AFFICHAGE DES NOTES (L'INDICE)
+    // Le map va créer 3 ou 4 bulles selon si c'est une triade ou une tétrade
+    let chordNotesIndices = currentFormula.intervals.map(i => (currentRoot + i) % 12);
+
+    chordNotesIndices.forEach(i => {
+        let bubble = document.createElement('div');
+        bubble.className = 'note-bubble';
+        bubble.textContent = notesNames[i];
+        notesDisplay.appendChild(bubble);
+    });
+
+    // 3. GÉNÉRATION DES RÉPONSES (PIÈGES)
+    let options = [];
+
+    // A. La bonne réponse
+    options.push({
+        text: notesNames[currentRoot] + " " + currentFormula.name,
+        isCorrect: true
+    });
+
+    // B. Les mauvaises réponses (Même racine, formules différentes)
+    // On prend toutes les formules SAUF la bonne
+    let wrongFormulas = formulas.filter(f => f.name !== currentFormula.name);
+
+    // On mélange les mauvaises formules
+    wrongFormulas.sort(() => Math.random() - 0.5);
+
+    // On en pioche 3
+    for(let i=0; i<3; i++) {
+        options.push({
+            text: notesNames[currentRoot] + " " + wrongFormulas[i].name,
+            isCorrect: false
+        });
     }
 
-    function nextQuestion() {
-        isProcessing = false;
-        choicesGrid.innerHTML = '';
-        notesDisplay.innerHTML = '';
+    // 4. MÉLANGE FINAL DES BOUTONS (Pour ne pas que la bonne réponse soit toujours la 1ère)
+    options.sort(() => Math.random() - 0.5);
 
-        currentRoot = Math.floor(Math.random() * 12);
-        currentFormula = formulas[Math.floor(Math.random() * formulas.length)];
+    // 5. CRÉATION DES BOUTONS
+    options.forEach(opt => {
+        let btn = document.createElement('div');
+        btn.className = 'choice-btn';
+        btn.textContent = opt.text;
+        btn.onclick = () => checkAnswer(opt, btn);
+        choicesGrid.appendChild(btn);
+    });
+}
 
-        let chordNotesIndices = currentFormula.intervals.map(i => (currentRoot + i) % 12);
+function checkAnswer(option, btn) {
+    if(isProcessing) return;
+    isProcessing = true;
 
-        chordNotesIndices.forEach(i => {
-            let bubble = document.createElement('div');
-            bubble.className = 'note-bubble';
-            bubble.textContent = notesNames[i];
-            notesDisplay.appendChild(bubble);
-        });
+    if(option.isCorrect) {
+        btn.classList.add('correct');
+        score++; streak++; updateScore();
+        setTimeout(nextQuestion, 600);
+    } else {
+        btn.classList.add('wrong');
+        streak = 0; updateScore();
 
-        let correctAnswer = {
-            text: notesNames[currentRoot] + " " + currentFormula.name,
-            isCorrect: true
-        };
-
-        let options = [correctAnswer];
-
-        while(options.length < 4) {
-            let rRoot = Math.floor(Math.random() * 12);
-            let rForm = formulas[Math.floor(Math.random() * formulas.length)];
-            let text = notesNames[rRoot] + " " + rForm.name;
-
-            if(!options.find(o => o.text === text)) {
-                options.push({ text: text, isCorrect: false });
+        // Correction visuelle : on montre le bon bouton
+        Array.from(choicesGrid.children).forEach(b => {
+            // On cherche le bouton qui contient le texte EXACT de la bonne formule
+            if(b.textContent.includes(currentFormula.name)) {
+                b.classList.add('correct');
             }
-        }
-
-        options.sort(() => Math.random() - 0.5);
-
-        options.forEach(opt => {
-            let btn = document.createElement('div');
-            btn.className = 'choice-btn';
-            btn.textContent = opt.text;
-            btn.onclick = () => checkAnswer(opt, btn);
-            choicesGrid.appendChild(btn);
         });
+        setTimeout(nextQuestion, 2000);
     }
+}
 
-    function checkAnswer(option, btn) {
-        if(isProcessing) return;
-        isProcessing = true;
+function updateScore() {
+    scoreVal.textContent = score;
+    streakVal.textContent = streak;
+}
 
-        if(option.isCorrect) {
-            btn.classList.add('correct');
-            score++; streak++; updateScore();
-            setTimeout(nextQuestion, 600);
-        } else {
-            btn.classList.add('wrong');
-            streak = 0; updateScore();
-            Array.from(choicesGrid.children).forEach(b => {
-                if(b.textContent.includes(notesNames[currentRoot] + " " + currentFormula.name)) {
-                    b.classList.add('correct');
-                }
-            });
-            setTimeout(nextQuestion, 2000);
-        }
-    }
+init();
 
-    function updateScore() {
-        scoreVal.textContent = score;
-        streakVal.textContent = streak;
-    }
 
-    init();
 </script>
+
+
 </body>
 </html>
