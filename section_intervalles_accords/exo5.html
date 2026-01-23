@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo 5 : Le Maestro</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text-main: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+        }
+
+        .nav-btn {
+            position: absolute; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+            z-index: 10;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px; border-radius: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center; max-width: 700px; width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* CONSIGNE */
+        .target-chord-box {
+            background: rgba(0,0,0,0.3);
+            padding: 30px; border-radius: 20px;
+            margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .target-chord-name {
+            font-size: 4rem; font-weight: 900; color: white;
+            text-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+            margin: 10px 0;
+        }
+
+        .status-text { font-size: 1.2rem; color: #94a3b8; margin-bottom: 10px; }
+
+        /* VISUALISEUR CHROMA (Barres) */
+        .chroma-visualizer {
+            display: flex; justify-content: center; align-items: flex-end;
+            gap: 5px; height: 150px; margin-bottom: 20px;
+            padding: 10px; background: rgba(0,0,0,0.2); border-radius: 15px;
+        }
+
+        .chroma-bar-container {
+            display: flex; flex-direction: column; align-items: center; width: 30px;
+        }
+
+        .chroma-bar {
+            width: 100%; background: var(--primary);
+            border-radius: 5px 5px 0 0;
+            transition: height 0.1s ease-out, background 0.2s;
+            height: 5%; opacity: 0.5;
+        }
+
+        .chroma-label { font-size: 0.7rem; color: #64748b; margin-top: 5px; font-weight: bold; }
+
+        /* BOUTON START */
+        .start-btn {
+            background: var(--success); color: white; border: none;
+            padding: 15px 40px; font-size: 1.2rem; font-weight: bold;
+            border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            transition: transform 0.2s; margin-top: 10px;
+        }
+        .start-btn:hover { transform: scale(1.05); }
+        .hidden { display: none; }
+
+        /* FEEDBACK */
+        .success-overlay {
+            position: absolute; inset: 0; background: rgba(16, 185, 129, 0.9);
+            border-radius: 30px; display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; font-weight: bold; color: white; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s; z-index: 50;
+        }
+        .success-overlay.show { opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
+
+    <div class="container">
+        <div class="success-overlay" id="successOverlay">BRAVO ! 🎉</div>
+
+        <div class="status-text">Prends ton instrument et joue :</div>
+
+        <div class="target-chord-box">
+            <div class="target-chord-name" id="chordTarget">?</div>
+            <div style="color: #a78bfa" id="chordNotes">...</div>
+        </div>
+
+        <div class="chroma-visualizer" id="chromaContainer">
+            </div>
+
+        <button class="start-btn" id="startBtn" onclick="startAudio()">Activer le Micro 🎙️</button>
+        <div id="status" style="margin-top:15px; color:#64748b; font-size:0.9rem;"></div>
+    </div>
+
+<script>
+    const notesNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+
+    // Accords cibles (Simplifié : Majeur / Mineur pour commencer)
+    const chordsDb = [
+        { root: 0, type: 'Majeur', intervals: [0, 4, 7] }, // Do Maj
+        { root: 2, type: 'Majeur', intervals: [0, 4, 7] }, // Ré Maj
+        { root: 4, type: 'Majeur', intervals: [0, 4, 7] }, // Mi Maj
+        { root: 5, type: 'Majeur', intervals: [0, 4, 7] }, // Fa Maj
+        { root: 7, type: 'Majeur', intervals: [0, 4, 7] }, // Sol Maj
+        { root: 9, type: 'Majeur', intervals: [0, 4, 7] }, // La Maj
+        { root: 4, type: 'Mineur', intervals: [0, 3, 7] }, // Mi Min
+        { root: 9, type: 'Mineur', intervals: [0, 3, 7] }, // La Min
+        { root: 2, type: 'Mineur', intervals: [0, 3, 7] }  // Ré Min
+    ];
+
+    let currentChord = null;
+    let audioContext, analyser, microphone, scriptProcessor;
+    let isRunning = false;
+    let validationTimer = 0; // Pour valider qu'on tient l'accord un peu
+
+    // DOM
+    const chordTargetEl = document.getElementById('chordTarget');
+    const chordNotesEl = document.getElementById('chordNotes');
+    const chromaContainer = document.getElementById('chromaContainer');
+    const successOverlay = document.getElementById('successOverlay');
+    const statusEl = document.getElementById('status');
+    const startBtn = document.getElementById('startBtn');
+
+    // Génération des barres HTML
+    let chromaBars = [];
+    notesNames.forEach((note, i) => {
+        let div = document.createElement('div');
+        div.className = 'chroma-bar-container';
+        div.innerHTML = `<div class="chroma-bar" id="bar-${i}"></div><span class="chroma-label">${note}</span>`;
+        chromaContainer.appendChild(div);
+        chromaBars.push(div.querySelector('.chroma-bar'));
+    });
+
+    function nextChord() {
+        currentChord = chordsDb[Math.floor(Math.random() * chordsDb.length)];
+        chordTargetEl.textContent = notesNames[currentChord.root] + " " + currentChord.type;
+
+        // Afficher les notes attendues (Aide visuelle)
+        let noteNames = currentChord.intervals.map(iv => notesNames[(currentChord.root + iv)%12]);
+        chordNotesEl.textContent = noteNames.join(" - ");
+
+        // Reset styles visuels
+        chromaBars.forEach(b => {
+            b.style.background = "var(--primary)";
+            b.style.boxShadow = "none";
+        });
+
+        // Mettre en évidence les barres attendues (petit indice)
+        let targetIndices = currentChord.intervals.map(iv => (currentChord.root + iv) % 12);
+        targetIndices.forEach(idx => {
+            chromaBars[idx].style.background = "rgba(255, 255, 255, 0.2)";
+        });
+    }
+
+    async function startAudio() {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 4096; // Grande précision requise pour les basses
+            analyser.smoothingTimeConstant = 0.5; // Lissage moyen
+
+            microphone = audioContext.createMediaStreamSource(stream);
+            microphone.connect(analyser);
+
+            isRunning = true;
+            startBtn.classList.add('hidden');
+            statusEl.textContent = "Écoute en cours...";
+
+            nextChord();
+            processAudio();
+        } catch (err) {
+            alert("Erreur micro: " + err);
+        }
+    }
+
+    // Le coeur du système : Analyseur de Spectre -> Chromagramme
+    function processAudio() {
+        if (!isRunning) return;
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+
+        // 1. Initialiser les 12 bins d'énergie
+        let chromaEnergy = new Array(12).fill(0);
+
+        // 2. Parcourir le spectre FFT
+        // On ignore les fréquences trop basses (< 50Hz) et trop hautes (> 2000Hz) pour éviter le bruit
+        let sampleRate = audioContext.sampleRate;
+
+        for (let i = 0; i < bufferLength; i++) {
+            let frequency = i * sampleRate / analyser.fftSize;
+
+            if (frequency > 60 && frequency < 2000) {
+                let amplitude = dataArray[i];
+                if (amplitude > 50) { // Noise Gate basique
+                    // Formule magique : Fréquence -> Numéro de Note MIDI
+                    let noteNum = 12 * (Math.log(frequency / 440) / Math.log(2)) + 69;
+                    let noteIndex = Math.round(noteNum) % 12;
+                    if (noteIndex < 0) noteIndex += 12;
+
+                    chromaEnergy[noteIndex] += amplitude;
+                }
+            }
+        }
+
+        // 3. Normalisation (pour avoir des valeurs entre 0 et 100%)
+        let maxEnergy = Math.max(...chromaEnergy);
+        if (maxEnergy < 100) maxEnergy = 1; // Éviter division par 0 si silence
+
+        // 4. Mise à jour de l'affichage et vérification
+        let targetIndices = currentChord.intervals.map(iv => (currentChord.root + iv) % 12);
+        let matchScore = 0;
+        let totalNoise = 0;
+
+        chromaEnergy.forEach((energy, i) => {
+            let normalized = (energy / maxEnergy) * 100;
+
+            // Affichage visuel fluide
+            let bar = chromaBars[i];
+            bar.style.height = Math.max(5, normalized) + "%";
+
+            // Logique de validation
+            // Est-ce que cette note fait partie de l'accord cible ?
+            if (targetIndices.includes(i)) {
+                if (normalized > 60) { // Seuil de détection d'une note "jouée"
+                    bar.style.background = "#10b981"; // Vert
+                    bar.style.opacity = 1;
+                    matchScore++;
+                } else {
+                    bar.style.background = "rgba(255, 255, 255, 0.2)"; // Gris (manquante)
+                }
+            } else {
+                // Note parasite (bruit)
+                if (normalized > 40) {
+                    bar.style.background = "#ef4444"; // Rouge
+                    bar.style.opacity = 1;
+                    totalNoise++; // Pénalité si on joue des fausses notes
+                } else {
+                    bar.style.background = "var(--primary)";
+                    bar.style.opacity = 0.5;
+                }
+            }
+        });
+
+        // 5. Conditions de victoire
+        // On veut entendre TOUTES les notes de l'accord (3/3) et PEU de bruit
+        if (matchScore >= 3 && totalNoise <= 1) {
+            validationTimer++;
+        } else {
+            validationTimer = 0;
+        }
+
+        // Si l'accord est tenu pendant environ 10 frames (~0.2s)
+        if (validationTimer > 10) {
+            triggerSuccess();
+        }
+
+        requestAnimationFrame(processAudio);
+    }
+
+    function triggerSuccess() {
+        isRunning = false; // Pause l'analyse
+        successOverlay.classList.add('show');
+
+        setTimeout(() => {
+            successOverlay.classList.remove('show');
+            nextChord();
+            isRunning = true;
+            validationTimer = 0;
+            requestAnimationFrame(processAudio);
+        }, 2000);
+    }
+
+</script>
+</body>
+</html>
