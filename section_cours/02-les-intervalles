@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours : Les Intervalles</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --secondary: #1e293b;
+            --text-main: #f1f5f9;
+            --card-bg: rgba(30, 41, 59, 0.9);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            line-height: 1.6;
+        }
+
+        .nav-btn {
+            position: fixed; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+            backdrop-filter: blur(5px); z-index: 100;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .content-container {
+            max-width: 800px; margin: 0 auto;
+            padding: 80px 20px 100px;
+        }
+
+        h1 {
+            font-size: 3rem; margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            color: var(--primary-light); border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+            padding-bottom: 10px; margin-top: 50px;
+        }
+
+        h3 { color: white; margin-top: 30px; font-size: 1.5rem; display: flex; align-items: center; }
+        h3::before { content: '•'; color: var(--primary); margin-right: 10px; font-size: 2rem; }
+
+        p, li { color: #cbd5e1; font-size: 1.1rem; }
+        strong { color: white; font-weight: 700; }
+        em { color: var(--primary-light); font-style: normal; }
+
+        .concept-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--primary);
+            padding: 20px; border-radius: 0 15px 15px 0;
+            margin: 20px 0;
+        }
+
+        /* VISUALISATION */
+        .interval-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin: 30px 0;
+        }
+        .interval-card {
+            background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05); text-align: center;
+        }
+        .interval-name { font-weight: bold; color: white; display: block; margin-bottom: 5px; font-size: 1.2rem;}
+        .interval-dist { color: var(--primary-light); font-family: monospace; }
+        .interval-desc { font-size: 0.9rem; color: #94a3b8; margin-top: 10px; font-style: italic; }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
+
+    <div class="content-container">
+
+        <h1>Les Intervalles</h1>
+        <p>En musique, les notes absolues (Do, Ré, Mi) importent peu. Ce qui compte, c'est la <strong>distance</strong> entre elles. C'est cette distance qui crée l'émotion.</p>
+
+        <div class="concept-box">
+            <strong>Définition :</strong> Un intervalle est simplement l'écart de hauteur entre deux sons. Sur une guitare, on mesure cette distance en <strong>Cases</strong> (Demi-tons).
+        </div>
+
+        <h2>I. L'Unité de Mesure</h2>
+        <p>Pour mesurer une distance géographique, on utilise le Mètre. En musique, on utilise le <strong>Ton</strong> et le <strong>Demi-Ton</strong>.</p>
+        <ul>
+            <li><strong>1 Demi-Ton = 1 Case</strong> de guitare. C'est la plus petite distance possible.</li>
+            <li><strong>1 Ton = 2 Cases</strong>. (Exemple : Do à Ré).</li>
+        </ul>
+
+        <h2>II. Le Nom des Intervalles</h2>
+        <p>On nomme les intervalles selon le nombre de notes traversées (1, 2, 3, 4...).</p>
+
+        <div class="interval-grid">
+            <div class="interval-card">
+                <span class="interval-name">Seconde (2)</span>
+                <span class="interval-dist">2 cases (Majeure)</span>
+                <div class="interval-desc">"Joyeux anniversaire" (début)</div>
+            </div>
+            <div class="interval-card">
+                <span class="interval-name">Tierce (3)</span>
+                <span class="interval-dist">3 ou 4 cases</span>
+                <div class="interval-desc">Définit si c'est Joyeux ou Triste.</div>
+            </div>
+            <div class="interval-card">
+                <span class="interval-name">Quinte (5)</span>
+                <span class="interval-dist">7 cases</span>
+                <div class="interval-desc">Power Chord (Rock). Très stable.</div>
+            </div>
+            <div class="interval-card">
+                <span class="interval-name">Octave (8)</span>
+                <span class="interval-dist">12 cases</span>
+                <div class="interval-desc">La même note, plus aigu.</div>
+            </div>
+        </div>
+
+        <h2>III. La Qualité : Majeur vs Mineur</h2>
+        <p>C'est le point crucial. Certains intervalles (les 2ndes, 3ces, 6tes, 7èmes) ont deux saveurs possibles :</p>
+        <ul>
+            <li><strong>Majeur (Grand écart) :</strong> Sonorité souvent joyeuse, brillante.</li>
+            <li><strong>Mineur (Petit écart) :</strong> Sonorité plus triste, sombre ou mélancolique.</li>
+        </ul>
+        <p><em>Note : La Quinte (5) et la Quarte (4) sont spéciales. Elles ne sont ni majeures ni mineures, elles sont "Justes".</em></p>
+
+        <h2>IV. Le Guide de Survie (en Cases)</h2>
+        <p>Voici la seule chose à retenir par cœur pour construire n'importe quel accord ou gamme. Comptez les cases à partir de votre note de départ (0) :</p>
+
+        <table style="width:100%; border-collapse:collapse; background:rgba(0,0,0,0.2); border-radius:10px; overflow:hidden; margin-top:20px;">
+            <tr style="background:rgba(139,92,246,0.2); color:white;">
+                <th style="padding:15px; text-align:left;">Nom</th>
+                <th style="padding:15px;">Distance</th>
+                <th style="padding:15px; text-align:right;">Symbole</th>
+            </tr>
+            <tr>
+                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">Seconde Majeure</td>
+                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">2 Cases</td>
+                <td style="padding:15px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.05);">2M</td>
+            </tr>
+            <tr>
+                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">Tierce Mineure 🌑</td>
+                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);"><strong>3 Cases</strong></td>
+                <td style="padding:15px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.05);">m3</td>
+            </tr>
+            <tr>
+                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">Tierce Majeure ☀️</td>
+                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);"><strong>4 Cases</strong></td>
+                <td style="padding:15px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.05);">M3</td>
+            </tr>
+            <tr>
+                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">Quinte Juste</td>
+                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">7 Cases</td>
+                <td style="padding:15px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.05);">5</td>
+            </tr>
+            <tr>
+                <td style="padding:15px;">Octave</td>
+                <td style="padding:15px;">12 Cases</td>
+                <td style="padding:15px; text-align:right;">8</td>
+            </tr>
+        </table>
+
+        <div class="concept-box" style="margin-top: 30px;">
+            <strong>Astuce :</strong> Apprenez surtout par cœur les distances de la <strong>Tierce</strong> (3 ou 4) et de la <strong>Quinte</strong> (7). C'est 90% du travail.
+        </div>
+
+    </div>
+
+</body>
+</html>
