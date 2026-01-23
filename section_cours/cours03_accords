@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours : Architecture des Accords</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --secondary: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.9);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            line-height: 1.6;
+        }
+
+        .nav-btn {
+            position: fixed; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+            backdrop-filter: blur(5px); z-index: 100;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .content-container {
+            max-width: 800px; margin: 0 auto;
+            padding: 80px 20px 100px;
+        }
+
+        h1 {
+            font-size: 3rem; margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            color: var(--primary-light); border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+            padding-bottom: 10px; margin-top: 50px;
+        }
+
+        h3 { color: white; margin-top: 30px; font-size: 1.5rem; display: flex; align-items: center; }
+        h3::before { content: '•'; color: var(--primary); margin-right: 10px; font-size: 2rem; }
+
+        p, li { color: #cbd5e1; font-size: 1.1rem; }
+
+        strong { color: white; font-weight: 700; }
+        em { color: var(--primary-light); font-style: normal; }
+
+        /* BOITES DE CONTENU */
+        .concept-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--primary);
+            padding: 20px; border-radius: 0 15px 15px 0;
+            margin: 20px 0;
+        }
+
+        .formula-tag {
+            background: rgba(139, 92, 246, 0.2); color: #e2e8f0;
+            padding: 2px 8px; border-radius: 5px; font-family: monospace; font-size: 1rem;
+        }
+
+        /* TABLEAUX */
+        table {
+            width: 100%; border-collapse: collapse; margin: 30px 0;
+            background: rgba(0,0,0,0.2); border-radius: 15px; overflow: hidden;
+        }
+        th { background: rgba(139, 92, 246, 0.2); color: white; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* RECAP FINAL */
+        .cheat-sheet {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid var(--primary);
+            padding: 30px; border-radius: 20px; margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
+
+    <div class="content-container">
+
+        <h1>Architecture des Accords</h1>
+        <p>Comprendre comment les notes s'assemblent pour créer des émotions.</p>
+
+        <div class="concept-box">
+            <strong>Le principe de base :</strong> Un accord est comme un bâtiment. Il a des fondations (la Note Racine) et des étages que l'on empile par-dessus (les Tierces).
+        </div>
+
+        <h2>I. Les Triades (3 notes)</h2>
+        <p>C'est l'accord standard. Il est composé de 3 notes qui ont chacune un rôle précis :</p>
+        <ul>
+            <li><strong>La Racine (1) :</strong> Donne le nom à l'accord (ex: Do).</li>
+            <li><strong>La Tierce (3) :</strong> Donne l'émotion (Joyeux ou Triste).</li>
+            <li><strong>La Quinte (5) :</strong> Donne la stabilité et la puissance.</li>
+        </ul>
+
+        <h3>1. L'Accord Majeur (Le Pilier)</h3>
+        <p>C'est l'accord le plus stable. Il sonne joyeux, lumineux et affirmé.</p>
+        <ul>
+            <li>Formule : <span class="formula-tag">1 - 3 - 5</span></li>
+            <li>Composition : Racine + Tierce Majeure + Quinte Juste.</li>
+        </ul>
+
+        <h3>2. L'Accord Mineur (L'Ombre)</h3>
+        <p>C'est le "miroir" triste de l'accord majeur. La tierce est légèrement plus basse, ce qui change tout.</p>
+        <ul>
+            <li>Formule : <span class="formula-tag">1 - b3 - 5</span></li>
+            <li>Composition : Racine + Tierce Mineure + Quinte Juste.</li>
+        </ul>
+
+        <h3>3. L'Accord Diminué (La Tension)</h3>
+        <p>Un accord serré et angoissant. On a l'impression qu'il va imploser. Il sert souvent dans les films d'horreur ou pour créer une forte tension avant une résolution.</p>
+        <ul>
+            <li>Formule : <span class="formula-tag">1 - b3 - b5</span></li>
+            <li>Composition : Racine + Tierce Mineure + Quinte Diminuée.</li>
+        </ul>
+
+        <h2>II. Les Accords Suspendus (Sus)</h2>
+        <div class="concept-box">
+            <strong>Le secret des Sus :</strong> Un accord "Sus" <em>n'a pas de Tierce</em>. Comme la note qui donne l'émotion (majeur/mineur) est absente, l'accord est neutre, "en suspens".
+        </div>
+
+        <h3>1. Sus4 (Suspendu Quarte)</h3>
+        <p>On remplace la Tierce par la <strong>Quarte</strong> (la note juste au-dessus). Cela crée une tension qui donne envie d'entendre la note redescendre.</p>
+        <ul><li>Exemple célèbre : L'intro de <em>Crazy Little Thing Called Love</em>.</li></ul>
+
+        <h3>2. Sus2 (Suspendu Seconde)</h3>
+        <p>On remplace la Tierce par la <strong>Seconde</strong> (la note juste en dessous). Le son est très ouvert, aérien et moderne.</p>
+        <ul><li>Exemple célèbre : L'intro de <em>Purple Rain</em> ou <em>Every Breath You Take</em>.</li></ul>
+
+        <h2>III. Les Tétrades (Les 7èmes)</h2>
+        <p>Si on ajoute une 4ème note par-dessus la triade, on obtient un accord de 7ème. C'est la base du Jazz, du Blues et de la Pop sophistiquée.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Accord</th>
+                    <th>Formule</th>
+                    <th>Style / Ressenti</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Majeur 7 (Maj7)</strong></td>
+                    <td>1 - 3 - 5 - 7</td>
+                    <td><strong>Jazz / Rêveur</strong>. Très doux, un peu nostalgique.</td>
+                </tr>
+                <tr>
+                    <td><strong>Mineur 7 (m7)</strong></td>
+                    <td>1 - b3 - 5 - b7</td>
+                    <td><strong>Cool / Lounge</strong>. Plus doux qu'un mineur classique.</td>
+                </tr>
+                <tr>
+                    <td><strong>Dominante 7 (7)</strong></td>
+                    <td>1 - 3 - 5 - b7</td>
+                    <td><strong>Blues / Rock</strong>. Contient une forte tension qui veut "avancer".</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="cheat-sheet">
+            <h2 style="margin-top:0">Mémo Rapide (Ecarts en notes)</h2>
+            <p>Pour construire ces accords sur ton instrument, compte les demi-tons (cases de guitare) à partir de la racine (0) :</p>
+            <ul>
+                <li><strong>Majeur :</strong> 0 — 4 — 7</li>
+                <li><strong>Mineur :</strong> 0 — 3 — 7</li>
+                <li><strong>Diminué :</strong> 0 — 3 — 6</li>
+                <li><strong>Sus 2 :</strong> 0 — 2 — 7</li>
+                <li><strong>Sus 4 :</strong> 0 — 5 — 7</li>
+                <li><strong>Majeur 7 :</strong> 0 — 4 — 7 — 11</li>
+                <li><strong>Mineur 7 :</strong> 0 — 3 — 7 — 10</li>
+                <li><strong>Dominante 7 :</strong> 0 — 4 — 7 — 10</li>
+            </ul>
+        </div>
+
+    </div>
+
+</body>
+</html>
