@@ -52,9 +52,6 @@
             padding-bottom: 10px; margin-top: 50px;
         }
 
-        h3 { color: white; margin-top: 30px; font-size: 1.5rem; display: flex; align-items: center; }
-        h3::before { content: '•'; color: var(--primary); margin-right: 10px; font-size: 2rem; }
-
         p, li { color: #cbd5e1; font-size: 1.1rem; }
         strong { color: white; font-weight: 700; }
         em { color: var(--primary-light); font-style: normal; }
@@ -66,209 +63,172 @@
             margin: 20px 0;
         }
 
-        /* VISUALISATION */
-        .interval-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px; margin: 30px 0;
+        /* TABLEAUX */
+        table {
+            width: 100%; border-collapse: collapse; margin-top: 30px;
+            background: rgba(0,0,0,0.3); border-radius: 15px; overflow: hidden;
         }
-        .interval-card {
-            background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.05); text-align: center;
-        }
-        .interval-name { font-weight: bold; color: white; display: block; margin-bottom: 5px; font-size: 1.2rem;}
-        .interval-dist { color: var(--primary-light); font-family: monospace; }
-        .interval-desc { font-size: 0.9rem; color: #94a3b8; margin-top: 10px; font-style: italic; }
+        th { background: rgba(139, 92, 246, 0.2); color: white; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1; }
+        tr:last-child td { border-bottom: none; }
+
+        .tag-maj { color: #fbbf24; font-weight: bold; }
+        .tag-min { color: #60a5fa; font-weight: bold; }
+        .tag-perfect { color: #10b981; font-weight: bold; }
+        .tag-dim { color: #ef4444; font-weight: bold; }
 
     </style>
 </head>
 <body>
 
-    <a href="../section_cours.html" class="nav-btn">← Retour</a>
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
 
     <div class="content-container">
 
         <h1>Les Intervalles</h1>
-        <p>En musique, les notes absolues (Do, Ré, Mi) importent peu. Ce qui compte, c'est la <strong>distance</strong> entre elles. C'est cette distance qui crée l'émotion.</p>
+        <p>Ce cours aborde la notion fondamentale de la théorie musicale : la mesure des distances entre les sons. C'est un concept universel, applicable au piano, à la guitare ou au violon.</p>
 
         <div class="concept-box">
-            <strong>Définition :</strong> Un intervalle est simplement l'écart de hauteur entre deux sons. Sur une guitare, on mesure cette distance en <strong>Cases</strong> (Demi-tons).
+            <strong>Définition :</strong> Un intervalle désigne l'écart de hauteur entre deux notes.
         </div>
 
-        <h2>I. L'Unité de Mesure</h2>
-        <p>Pour mesurer une distance géographique, on utilise le Mètre. En musique, on utilise le <strong>Ton</strong> et le <strong>Demi-Ton</strong>.</p>
+        <h2>I. De la notion de Ton à l'Intervalle</h2>
+        <p>Dans le système classique, vous avez l'habitude de mesurer la distance en Tons et Demi-tons.</p>
+        <p>Prenons l'exemple d'un mouvement de <strong>Do</strong> vers <strong>Mi</strong> :</p>
         <ul>
-            <li><strong>1 Demi-Ton = 1 Case</strong> de guitare. C'est la plus petite distance possible.</li>
-            <li><strong>1 Ton = 2 Cases</strong>. (Exemple : Do à Ré).</li>
+            <li>De Do à Ré = 1 Ton</li>
+            <li>De Ré à Mi = 1 Ton</li>
+            <li>Total = <strong>2 Tons</strong>.</li>
+        </ul>
+        <p>Cependant, en harmonie, nous utilisons une nomenclature plus précise qui permet de nommer la fonction de la note. Au lieu de dire "2 Tons", nous dirons que c'est une <strong>Tierce</strong>.</p>
+
+        <h3>La logique de nommage</h3>
+        <p>Le nom de l'intervalle est déterminé par le nombre de notes englobées (bornes incluses) dans la gamme naturelle :</p>
+        <ul>
+            <li><strong>Seconde :</strong> 2 notes concernées (ex: Do-Ré). C'est la note voisine.</li>
+            <li><strong>Tierce :</strong> 3 notes concernées (ex: Do-[Ré]-Mi). C'est un saut d'une note.</li>
+            <li><strong>Quarte :</strong> 4 notes concernées (ex: Do-Fa).</li>
+            <li><strong>Quinte :</strong> 5 notes concernées (ex: Do-Sol).</li>
+            <li><strong>Sixte :</strong> 6 notes concernées (ex: Do-La).</li>
+            <li><strong>Septième :</strong> 7 notes concernées (ex: Do-Si).</li>
+            <li><strong>Octave :</strong> 8 notes concernées (ex: Do-Do). On retrouve la note de départ à la fréquence double.</li>
         </ul>
 
+        <h2>II. La Qualification : Majeur vs Mineur</h2>
+        <p>C'est ici que la précision est nécessaire. Dire "c'est une Tierce" ne suffit pas, car il existe plusieurs tailles de tierces.</p>
 
+        <h3>L'exemple de la Tierce</h3>
+        <p>Reprenons notre <strong>Do</strong> comme référence.</p>
 
-        <div class="interval-grid">
-            <div class="interval-card">
-                <span class="interval-name">La Seconde (2)</span>
-                <span class="interval-desc">La note voisine directe.<br>(ex: Do à Ré)</span>
-            </div>
-            <div class="interval-card">
-                <span class="interval-name">La Tierce (3)</span>
-                <span class="interval-desc">On saute une note.<br>Définit l'émotion (Joyeux/Triste).</span>
-            </div>
-            <div class="interval-card">
-                <span class="interval-name">La Quarte (4)</span>
-                <span class="interval-desc">Ecart moyen.<br>Dissonance légère.</span>
-            </div>
-            <div class="interval-card">
-                <span class="interval-name">La Quinte (5)</span>
-                <span class="interval-desc">Le pilier, très stable.<br>Power Chord.</span>
-            </div>
-            <div class="interval-card">
-                <span class="interval-name">L'Octave (8)</span>
-                <span class="interval-desc">La même note, plus aiguë.<br>La boucle est bouclée.</span>
-            </div>
-        </div>
+        <p>1. <strong>Do — Mi (Naturel)</strong></p>
+        <p>La distance est de 2 Tons (4 demi-tons). C'est l'écart standard. On l'appelle <strong>Tierce Majeure</strong>. C'est la base de l'accord Majeur.</p>
 
-        <h2 style="margin-top: 50px;">III. La Nuance : Majeur vs Mineur</h2>
-        <p>C'est ici que tout se joue. Pour une même famille (ex: les Tierces), il existe deux tailles possibles :</p>
+        <p>2. <strong>Do — Ré# (ou Mi bémol)</strong></p>
+        <p>Théoriquement, cela reste une tierce (Do-Ré-Mi). Mais la note d'arrivée est abaissée d'un demi-ton. La distance n'est plus que de 1,5 Ton (3 demi-tons).</p>
+        <p>L'intervalle est plus petit. On l'appelle <strong>Tierce Mineure</strong>. C'est la base de l'accord Mineur.</p>
 
         <div class="concept-box">
-            <ul>
-                <li><strong>Majeur (Grand) :</strong> Souvent Joyeux / Brillant.</li>
-                <li><strong>Mineur (Petit) :</strong> Souvent Triste / Sombre.</li>
-            </ul>
-            <p style="margin-top:10px; font-size:0.9rem;"><em>Règle simple : Pour passer de Majeur à Mineur, on retire <strong>1 case</strong>.</em></p>
+            <strong>Règle générale :</strong>
+            Si l'intervalle majeur est réduit d'un demi-ton, il devient <strong>Mineur</strong>.
+            <br><em>Note : Sur une guitare, cela revient simplement à reculer d'une case.</em>
         </div>
 
-        <p><strong>Note importante :</strong> La Quarte, la Quinte et l'Octave sont des exceptions. Elles ne sont ni majeures ni mineures, elles sont <strong>"Justes"</strong> (invariables).</p>
+        <h3>L'exception des intervalles "Justes"</h3>
+        <p>Certains intervalles ne possèdent pas cette dualité Majeur/Mineur car ils sont considérés comme des piliers acoustiques stables. Il s'agit de :</p>
+        <ul>
+            <li>La Quarte (4)</li>
+            <li>La Quinte (5)</li>
+            <li>L'Octave (8)</li>
+        </ul>
+        <p>On dit qu'ils sont <strong>Justes</strong> (Perfect). Si on abaisse une Quinte Juste, elle ne devient pas mineure, mais <strong>Diminuée</strong> (c'est le fameux Triton).</p>
 
-        <h2>IV. Le Guide de Survie (Liste Complète)</h2>
-        <p>Voici les 12 intervalles possibles sur votre manche.</p>
+        <h2>III. Tableau Récapitulatif</h2>
+        <p>Voici les distances exactes en demi-tons (et donc en cases sur la guitare) pour chaque intervalle.</p>
 
         <table>
             <thead>
                 <tr>
-                    <th>Famille</th>
-                    <th>Nuance</th>
-                    <th>Distance</th>
-                    <th>Exemple Célèbre</th>
+                    <th>Nom de l'Intervalle</th>
+                    <th>Qualité</th>
+                    <th>Distance (Demi-tons / Cases)</th>
+                    <th>Exemple depuis Do</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td rowspan="2"><strong>Seconde</strong></td>
-                    <td style="color:#60a5fa; font-weight:bold;">Mineure (b2)</td>
-                    <td>1 Case</td>
-                    <td>Les Dents de la Mer</td>
+                    <td><strong>Seconde</strong></td>
+                    <td class="tag-min">Mineure (b2)</td>
+                    <td>1</td>
+                    <td>Do ➔ Ré bémol</td>
                 </tr>
                 <tr>
-                    <td style="color:#fbbf24; font-weight:bold;">Majeure (2)</td>
-                    <td>2 Cases</td>
-                    <td>Frère Jacques</td>
-                </tr>
-
-                <tr style="border-top: 2px solid rgba(255,255,255,0.1);">
-                    <td rowspan="2"><strong>Tierce</strong></td>
-                    <td style="color:#60a5fa; font-weight:bold;">Mineure (b3) 🌑</td>
-                    <td><strong>3 Cases</strong></td>
-                    <td>Accords Mineurs (Triste)</td>
+                    <td><strong>Seconde</strong></td>
+                    <td class="tag-maj">Majeure (2)</td>
+                    <td>2</td>
+                    <td>Do ➔ Ré</td>
                 </tr>
                 <tr>
-                    <td style="color:#fbbf24; font-weight:bold;">Majeure (3) ☀️</td>
-                    <td><strong>4 Cases</strong></td>
-                    <td>Accords Majeurs (Joyeux)</td>
+                    <td><strong>Tierce</strong></td>
+                    <td class="tag-min">Mineure (b3)</td>
+                    <td>3</td>
+                    <td>Do ➔ Mi bémol</td>
                 </tr>
-
-                <tr style="border-top: 2px solid rgba(255,255,255,0.1);">
+                <tr>
+                    <td><strong>Tierce</strong></td>
+                    <td class="tag-maj">Majeure (3)</td>
+                    <td>4</td>
+                    <td>Do ➔ Mi</td>
+                </tr>
+                <tr>
                     <td><strong>Quarte</strong></td>
-                    <td style="color:#10b981; font-weight:bold;">Juste (4)</td>
-                    <td>5 Cases</td>
-                    <td>La Marseillaise</td>
+                    <td class="tag-perfect">Juste (4)</td>
+                    <td>5</td>
+                    <td>Do ➔ Fa</td>
                 </tr>
-
                 <tr>
-                    <td><strong>Triton</strong></td>
-                    <td style="color:#ef4444; font-weight:bold;">Diminué (b5)</td>
-                    <td>6 Cases</td>
-                    <td>Les Simpsons (Intro)</td>
+                    <td><strong>Quinte Diminuée (Triton)</strong></td>
+                    <td class="tag-dim">Diminuée (b5)</td>
+                    <td>6</td>
+                    <td>Do ➔ Sol bémol</td>
                 </tr>
-
-                <tr style="border-top: 2px solid rgba(255,255,255,0.1);">
+                <tr>
                     <td><strong>Quinte</strong></td>
-                    <td style="color:#10b981; font-weight:bold;">Juste (5)</td>
-                    <td><strong>7 Cases</strong></td>
-                    <td>Star Wars / Rock</td>
-                </tr>
-
-                <tr style="border-top: 2px solid rgba(255,255,255,0.1);">
-                    <td rowspan="2"><strong>Sixte</strong></td>
-                    <td style="color:#60a5fa; font-weight:bold;">Mineure (b6)</td>
-                    <td>8 Cases</td>
-                    <td>Love Story</td>
+                    <td class="tag-perfect">Juste (5)</td>
+                    <td>7</td>
+                    <td>Do ➔ Sol</td>
                 </tr>
                 <tr>
-                    <td style="color:#fbbf24; font-weight:bold;">Majeure (6)</td>
-                    <td>9 Cases</td>
-                    <td>La Traviata</td>
-                </tr>
-
-                <tr style="border-top: 2px solid rgba(255,255,255,0.1);">
-                    <td rowspan="2"><strong>Septième</strong></td>
-                    <td style="color:#60a5fa; font-weight:bold;">Mineure (b7)</td>
-                    <td>10 Cases</td>
-                    <td>Blues / Funk</td>
+                    <td><strong>Sixte</strong></td>
+                    <td class="tag-min">Mineure (b6)</td>
+                    <td>8</td>
+                    <td>Do ➔ La bémol</td>
                 </tr>
                 <tr>
-                    <td style="color:#fbbf24; font-weight:bold;">Majeure (7)</td>
-                    <td>11 Cases</td>
-                    <td>Jazz / Rêveur</td>
+                    <td><strong>Sixte</strong></td>
+                    <td class="tag-maj">Majeure (6)</td>
+                    <td>9</td>
+                    <td>Do ➔ La</td>
                 </tr>
-
-                <tr style="border-top: 2px solid rgba(255,255,255,0.1);">
+                <tr>
+                    <td><strong>Septième</strong></td>
+                    <td class="tag-min">Mineure (b7)</td>
+                    <td>10</td>
+                    <td>Do ➔ Si bémol</td>
+                </tr>
+                <tr>
+                    <td><strong>Septième</strong></td>
+                    <td class="tag-maj">Majeure (7)</td>
+                    <td>11</td>
+                    <td>Do ➔ Si</td>
+                </tr>
+                <tr>
                     <td><strong>Octave</strong></td>
-                    <td style="color:#10b981; font-weight:bold;">Juste (8)</td>
-                    <td><strong>12 Cases</strong></td>
-                    <td>Somewhere Over The Rainbow</td>
+                    <td class="tag-perfect">Juste (8)</td>
+                    <td>12</td>
+                    <td>Do ➔ Do</td>
                 </tr>
             </tbody>
         </table>
-
-        <h2>IV. Le Guide de Survie (en Cases)</h2>
-        <p>Voici la seule chose à retenir par cœur pour construire n'importe quel accord ou gamme. Comptez les cases à partir de votre note de départ (0) :</p>
-
-        <table style="width:100%; border-collapse:collapse; background:rgba(0,0,0,0.2); border-radius:10px; overflow:hidden; margin-top:20px;">
-            <tr style="background:rgba(139,92,246,0.2); color:white;">
-                <th style="padding:15px; text-align:left;">Nom</th>
-                <th style="padding:15px;">Distance</th>
-                <th style="padding:15px; text-align:right;">Symbole</th>
-            </tr>
-            <tr>
-                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">Seconde Majeure</td>
-                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">2 Cases</td>
-                <td style="padding:15px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.05);">2M</td>
-            </tr>
-            <tr>
-                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">Tierce Mineure 🌑</td>
-                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);"><strong>3 Cases</strong></td>
-                <td style="padding:15px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.05);">m3</td>
-            </tr>
-            <tr>
-                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">Tierce Majeure ☀️</td>
-                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);"><strong>4 Cases</strong></td>
-                <td style="padding:15px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.05);">M3</td>
-            </tr>
-            <tr>
-                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">Quinte Juste</td>
-                <td style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05);">7 Cases</td>
-                <td style="padding:15px; text-align:right; border-bottom:1px solid rgba(255,255,255,0.05);">5</td>
-            </tr>
-            <tr>
-                <td style="padding:15px;">Octave</td>
-                <td style="padding:15px;">12 Cases</td>
-                <td style="padding:15px; text-align:right;">8</td>
-            </tr>
-        </table>
-
-        <div class="concept-box" style="margin-top: 30px;">
-            <strong>Astuce :</strong> Apprenez surtout par cœur les distances de la <strong>Tierce</strong> (3 ou 4) et de la <strong>Quinte</strong> (7). C'est 90% du travail.
-        </div>
 
     </div>
 
