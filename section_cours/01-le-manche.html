@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours : La Géographie du Manche</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --secondary: #1e293b;
+            --text-main: #f1f5f9;
+            --card-bg: rgba(30, 41, 59, 0.9);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(260,39%,30%,1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(300,49%,30%,1) 0, transparent 50%);
+            background-color: #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            line-height: 1.6;
+        }
+
+        .nav-btn {
+            position: fixed; top: 25px; left: 25px;
+            text-decoration: none; color: rgba(255, 255, 255, 0.8);
+            font-weight: 600; padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
+            backdrop-filter: blur(5px); z-index: 100;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        .content-container {
+            max-width: 800px; margin: 0 auto;
+            padding: 80px 20px 100px;
+        }
+
+        h1 {
+            font-size: 3rem; margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            color: var(--primary-light); border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+            padding-bottom: 10px; margin-top: 50px;
+        }
+
+        h3 { color: white; margin-top: 30px; font-size: 1.5rem; display: flex; align-items: center; }
+        h3::before { content: '•'; color: var(--primary); margin-right: 10px; font-size: 2rem; }
+
+        p, li { color: #cbd5e1; font-size: 1.1rem; }
+        strong { color: white; font-weight: 700; }
+        em { color: var(--primary-light); font-style: normal; }
+
+        .concept-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--primary);
+            padding: 20px; border-radius: 0 15px 15px 0;
+            margin: 20px 0;
+        }
+
+        /* VISUALISATION DES CORDES */
+        .string-viz {
+            display: flex; flex-direction: column; gap: 10px;
+            background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px;
+            margin: 20px 0;
+        }
+        .string-row {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .string-name {
+            font-weight: bold; width: 40px; color: var(--primary-light);
+        }
+        .string-line {
+            flex-grow: 1; height: 2px; background: #475569; position: relative; margin: 0 15px;
+        }
+        .string-note { font-family: monospace; color: #94a3b8; }
+
+        /* Épaisseur des cordes visuelles */
+        .s6 .string-line { height: 4px; }
+        .s5 .string-line { height: 3.5px; }
+        .s4 .string-line { height: 3px; }
+        .s3 .string-line { height: 2.5px; }
+        .s2 .string-line { height: 2px; }
+        .s1 .string-line { height: 1px; }
+
+        .fret-marker {
+            background: rgba(139, 92, 246, 0.2); padding: 5px 10px; border-radius: 5px;
+            display: inline-block; margin: 5px; border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" class="nav-btn">← Retour</a>
+
+    <div class="content-container">
+
+        <h1>La Géographie du Manche</h1>
+        <p>Contrairement au piano qui est linéaire (gauche vers droite), la guitare est une <strong>matrice à deux dimensions</strong> (cordes x cases).</p>
+
+        <div class="concept-box">
+            <strong>Le principe fondamental :</strong> Chaque case vers la droite ajoute exactement <strong>+1 Demi-Ton</strong>. C'est une unité de mesure physique fixe.
+        </div>
+
+        <h2>I. L'Axe Vertical : Les Cordes à Vide</h2>
+        <p>C'est votre point de départ (le zéro). En accordage standard, les cordes sont accordées en quartes (sauf une exception). Voici les notes quand vous ne touchez à rien :</p>
+
+        <div class="string-viz">
+            <div class="string-row s1"><span class="string-name">1 (e)</span><div class="string-line"></div><span class="string-note">Mi (Aigu)</span></div>
+            <div class="string-row s2"><span class="string-name">2 (B)</span><div class="string-line"></div><span class="string-note">Si</span></div>
+            <div class="string-row s3"><span class="string-name">3 (G)</span><div class="string-line"></div><span class="string-note">Sol</span></div>
+            <div class="string-row s4"><span class="string-name">4 (D)</span><div class="string-line"></div><span class="string-note">Ré</span></div>
+            <div class="string-row s5"><span class="string-name">5 (A)</span><div class="string-line"></div><span class="string-note">La</span></div>
+            <div class="string-row s6"><span class="string-name">6 (E)</span><div class="string-line"></div><span class="string-note">Mi (Grave)</span></div>
+        </div>
+
+        <p>Notez que la 1ère et la 6ème corde sont la même note (Mi), séparées par deux octaves. C'est un repère visuel crucial : ce que vous jouez en haut marche souvent en bas.</p>
+
+        <h2>II. L'Axe Horizontal : Les Cases</h2>
+        <p>Le manche est divisé par des barrettes métalliques (les frettes). La règle est absolue :</p>
+
+        <div class="concept-box" style="text-align: center; font-size: 1.2rem;">
+            1 Case = 1 Demi-Ton
+        </div>
+
+        <p>Si vous partez de la corde de La (A) à vide :</p>
+        <ul>
+            <li>Case 0 : <strong>La</strong></li>
+            <li>Case 1 : <strong>La#</strong> (ou Si bémol)</li>
+            <li>Case 2 : <strong>Si</strong></li>
+            <li>Case 3 : <strong>Do</strong> (Car il n'y a pas de dièse entre Si et Do)</li>
+        </ul>
+
+        <h3>Le Miroir de la Case 12</h3>
+        <p>Regardez votre manche : il y a souvent deux points (inlays) sur la <strong>12ème case</strong>. Pourquoi ?</p>
+        <p>En musique, il y a 12 demi-tons dans une octave. Donc, à la case 12, vous avez fait le tour complet du cycle.</p>
+        <p><strong>La case 12 est identique aux cordes à vide</strong>, juste une octave plus haut. Le manche "recommence" à zéro à partir d'ici.</p>
+
+        <h2>III. L'Enharmonie (Le piège visuel)</h2>
+        <p>Sur un piano, c'est la touche noire. Sur une guitare, c'est la même case.</p>
+        <p>La note située entre le <em>La</em> et le <em>Si</em> peut s'appeler de deux façons :</p>
+        <ul>
+            <li><strong>La# (La Dièse) :</strong> "Le La qui est monté".</li>
+            <li><strong>Bb (Si Bémol) :</strong> "Le Si qui est descendu".</li>
+        </ul>
+        <p>C'est la même fréquence physique, la même case, le même son. Seul le contexte théorique change le nom.</p>
+
+        <h2>IV. Comment trouver n'importe quelle note ?</h2>
+        <p>Pas besoin d'apprendre les 130 notes par cœur. Il suffit de connaître deux choses :</p>
+        <ol>
+            <li>Le nom des cordes à vide (Mi La Ré Sol Si Mi).</li>
+            <li>L'ordre naturel : Do - Ré - Mi (pas de #) - Fa - Sol - La - Si (pas de #) - Do.</li>
+        </ol>
+
+        <p><strong>Exemple :</strong> Je cherche la note sur la <em>Corde de Mi, Case 3</em>.</p>
+        <p>
+            <span class="fret-marker">0 (Vide) = Mi</span> ➔
+            <span class="fret-marker">1 = Fa</span> (car pas de Mi#) ➔
+            <span class="fret-marker">2 = Fa#</span> ➔
+            <span class="fret-marker">3 = Sol</span>.
+        </p>
+
+    </div>
+
+</body>
+</html>
