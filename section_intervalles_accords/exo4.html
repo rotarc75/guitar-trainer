@@ -46,7 +46,21 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* CONSIGNE (NOUVEAU) */
+        /* NIVEAUX */
+        .level-bar {
+            display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;
+        }
+        .level-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #94a3b8; padding: 8px 16px; border-radius: 20px; cursor: pointer;
+            font-size: 0.9rem; font-weight: bold; transition: all 0.2s;
+        }
+        .level-btn.active {
+            background: var(--primary); color: white; border-color: var(--primary-light);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+        }
+        .level-btn:hover:not(.active) { background: rgba(255,255,255,0.15); }
+
         .rule-box {
             background: rgba(139, 92, 246, 0.1);
             border: 1px solid rgba(139, 92, 246, 0.3);
@@ -62,7 +76,6 @@
         }
         .streak { color: var(--primary-light); }
 
-        /* INDICES */
         .clue-box {
             background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);
             padding: 30px; border-radius: 20px; margin-bottom: 30px;
@@ -78,7 +91,6 @@
             font-size: 1.5rem; box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
 
-        /* REPONSES */
         .choices-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
         }
@@ -105,9 +117,15 @@
             <span class="streak">Série: <span id="streakVal">0</span></span>
         </div>
 
+        <div class="level-bar">
+            <button class="level-btn active" onclick="setLevel(1)">Niveau 1</button>
+            <button class="level-btn" onclick="setLevel(2)">Niveau 2</button>
+            <button class="level-btn" onclick="setLevel(3)">Niveau 3</button>
+        </div>
+
         <div class="rule-box">
             <span class="rule-icon">🕵️</span>
-            Analyse les notes et trouve le nom de l'accord.
+            Trouve l'accord correspondant (même fondamentale).
         </div>
 
         <div class="clue-box">
@@ -117,134 +135,153 @@
         <div class="choices-grid" id="choicesGrid"></div>
     </div>
 
-
-
 <script>
+    const notesNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
 
-const notesNames = ["Do", "Do#", "Ré", "Ré#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
+    // Base de données avec niveaux assignés
+    const allFormulas = [
+        // --- NIVEAU 1 (Basic) ---
+        { name: "Majeur", intervals: [0, 4, 7], level: 1 },
+        { name: "Mineur", intervals: [0, 3, 7], level: 1 },
 
-// LA LISTE COMPLÈTE ET ÉQUILIBRÉE
-const formulas = [
-    // --- NIVEAU 1 : Les Triades (3 notes) ---
-    { name: "Majeur", intervals: [0, 4, 7] },
-    { name: "Mineur", intervals: [0, 3, 7] },
-    { name: "Diminué", intervals: [0, 3, 6] },
-    { name: "Augmenté", intervals: [0, 4, 8] },
-    { name: "Sus2", intervals: [0, 2, 7] },
-    { name: "Sus4", intervals: [0, 5, 7] },
+        // --- NIVEAU 2 (Intermédiaire) ---
+        { name: "Diminué", intervals: [0, 3, 6], level: 2 },
+        { name: "Augmenté", intervals: [0, 4, 8], level: 2 },
 
-    // --- NIVEAU 2 : Les Tétrades (4 notes) ---
-    { name: "Majeur 7 (M7)", intervals: [0, 4, 7, 11] },    // Le "Joli"
-    { name: "Mineur 7 (m7)", intervals: [0, 3, 7, 10] },    // Le "Cool"
-    { name: "Dominante 7", intervals: [0, 4, 7, 10] },      // Le "Bluesy"
-    { name: "Demi-Diminué (Ø)", intervals: [0, 3, 6, 10] }  // Le "Jazzy" (m7b5)
-];
+        // --- NIVEAU 3 (Expert) ---
+        { name: "Sus2", intervals: [0, 2, 7], level: 3 },
+        { name: "Sus4", intervals: [0, 5, 7], level: 3 },
+        { name: "Majeur 7 (M7)", intervals: [0, 4, 7, 11], level: 3 },
+        { name: "Mineur 7 (m7)", intervals: [0, 3, 7, 10], level: 3 },
+        { name: "Dominante 7", intervals: [0, 4, 7, 10], level: 3 },
+        { name: "Demi-Diminué (Ø)", intervals: [0, 3, 6, 10], level: 3 }
+    ];
 
-let currentRoot = 0;
-let currentFormula = null;
-let score = 0;
-let streak = 0;
-let isProcessing = false;
+    let currentLevel = 1;
+    let activeFormulas = [];
+    let currentRoot = 0;
+    let currentFormula = null;
+    let score = 0;
+    let streak = 0;
+    let isProcessing = false;
 
-const notesDisplay = document.getElementById('notesDisplay');
-const choicesGrid = document.getElementById('choicesGrid');
-const scoreVal = document.getElementById('scoreVal');
-const streakVal = document.getElementById('streakVal');
+    // DOM
+    const notesDisplay = document.getElementById('notesDisplay');
+    const choicesGrid = document.getElementById('choicesGrid');
+    const scoreVal = document.getElementById('scoreVal');
+    const streakVal = document.getElementById('streakVal');
+    const levelBtns = document.querySelectorAll('.level-btn');
 
-function init() {
-    nextQuestion();
-}
+    function init() {
+        setLevel(1);
+    }
 
-function nextQuestion() {
-    isProcessing = false;
-    choicesGrid.innerHTML = '';
-    notesDisplay.innerHTML = '';
+    function setLevel(lvl) {
+        currentLevel = lvl;
 
-    // 1. CHOIX DE LA QUESTION
-    currentRoot = Math.floor(Math.random() * 12);
-    currentFormula = formulas[Math.floor(Math.random() * formulas.length)];
+        // Mise à jour visuelle des boutons
+        levelBtns.forEach((btn, idx) => {
+            if(idx + 1 === lvl) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
 
-    // 2. AFFICHAGE DES NOTES (L'INDICE)
-    // Le map va créer 3 ou 4 bulles selon si c'est une triade ou une tétrade
-    let chordNotesIndices = currentFormula.intervals.map(i => (currentRoot + i) % 12);
+        // Filtrage des formules disponibles
+        // Niveau 1 : Uniquement level 1
+        // Niveau 2 : Level 1 + Level 2
+        // Niveau 3 : Tout
+        activeFormulas = allFormulas.filter(f => f.level <= currentLevel);
 
-    chordNotesIndices.forEach(i => {
-        let bubble = document.createElement('div');
-        bubble.className = 'note-bubble';
-        bubble.textContent = notesNames[i];
-        notesDisplay.appendChild(bubble);
-    });
+        // Reset série quand on change de niveau
+        streak = 0;
+        updateScore();
+        nextQuestion();
+    }
 
-    // 3. GÉNÉRATION DES RÉPONSES (PIÈGES)
-    let options = [];
+    function nextQuestion() {
+        isProcessing = false;
+        choicesGrid.innerHTML = '';
+        notesDisplay.innerHTML = '';
 
-    // A. La bonne réponse
-    options.push({
-        text: notesNames[currentRoot] + " " + currentFormula.name,
-        isCorrect: true
-    });
+        // 1. Choisir une formule parmi celles actives
+        currentRoot = Math.floor(Math.random() * 12);
+        currentFormula = activeFormulas[Math.floor(Math.random() * activeFormulas.length)];
 
-    // B. Les mauvaises réponses (Même racine, formules différentes)
-    // On prend toutes les formules SAUF la bonne
-    let wrongFormulas = formulas.filter(f => f.name !== currentFormula.name);
+        // 2. Afficher les notes (Indice)
+        let chordNotesIndices = currentFormula.intervals.map(i => (currentRoot + i) % 12);
+        chordNotesIndices.forEach(i => {
+            let bubble = document.createElement('div');
+            bubble.className = 'note-bubble';
+            bubble.textContent = notesNames[i];
+            notesDisplay.appendChild(bubble);
+        });
 
-    // On mélange les mauvaises formules
-    wrongFormulas.sort(() => Math.random() - 0.5);
+        // 3. Générer les choix (Pièges avec même fondamentale)
+        let options = [];
 
-    // On en pioche 3
-    for(let i=0; i<3; i++) {
+        // La bonne réponse
         options.push({
-            text: notesNames[currentRoot] + " " + wrongFormulas[i].name,
-            isCorrect: false
+            text: notesNames[currentRoot] + " " + currentFormula.name,
+            isCorrect: true
+        });
+
+        // Les mauvaises réponses
+        // On prend les formules actives qui ne sont PAS la bonne
+        let wrongFormulas = activeFormulas.filter(f => f.name !== currentFormula.name);
+        wrongFormulas.sort(() => Math.random() - 0.5);
+
+        // Combien de boutons afficher ?
+        // Niveau 1 : On a que 2 formules possibles (Maj/Min), donc on aura que 2 boutons.
+        // Niveau 2 et + : On veut 4 boutons au total (1 bonne + 3 mauvaises).
+        let maxDecoys = 3;
+        if(wrongFormulas.length < 3) maxDecoys = wrongFormulas.length;
+
+        for(let i=0; i<maxDecoys; i++) {
+            options.push({
+                text: notesNames[currentRoot] + " " + wrongFormulas[i].name,
+                isCorrect: false
+            });
+        }
+
+        // Mélanger l'ordre
+        options.sort(() => Math.random() - 0.5);
+
+        // Création des boutons
+        options.forEach(opt => {
+            let btn = document.createElement('div');
+            btn.className = 'choice-btn';
+            btn.textContent = opt.text;
+            btn.onclick = () => checkAnswer(opt, btn);
+            choicesGrid.appendChild(btn);
         });
     }
 
-    // 4. MÉLANGE FINAL DES BOUTONS (Pour ne pas que la bonne réponse soit toujours la 1ère)
-    options.sort(() => Math.random() - 0.5);
+    function checkAnswer(option, btn) {
+        if(isProcessing) return;
+        isProcessing = true;
 
-    // 5. CRÉATION DES BOUTONS
-    options.forEach(opt => {
-        let btn = document.createElement('div');
-        btn.className = 'choice-btn';
-        btn.textContent = opt.text;
-        btn.onclick = () => checkAnswer(opt, btn);
-        choicesGrid.appendChild(btn);
-    });
-}
+        if(option.isCorrect) {
+            btn.classList.add('correct');
+            score++; streak++; updateScore();
+            setTimeout(nextQuestion, 600);
+        } else {
+            btn.classList.add('wrong');
+            streak = 0; updateScore();
 
-function checkAnswer(option, btn) {
-    if(isProcessing) return;
-    isProcessing = true;
-
-    if(option.isCorrect) {
-        btn.classList.add('correct');
-        score++; streak++; updateScore();
-        setTimeout(nextQuestion, 600);
-    } else {
-        btn.classList.add('wrong');
-        streak = 0; updateScore();
-
-        // Correction visuelle : on montre le bon bouton
-        Array.from(choicesGrid.children).forEach(b => {
-            // On cherche le bouton qui contient le texte EXACT de la bonne formule
-            if(b.textContent.includes(currentFormula.name)) {
-                b.classList.add('correct');
-            }
-        });
-        setTimeout(nextQuestion, 2000);
+            Array.from(choicesGrid.children).forEach(b => {
+                if(b.textContent.includes(currentFormula.name)) {
+                    b.classList.add('correct');
+                }
+            });
+            setTimeout(nextQuestion, 2000);
+        }
     }
-}
 
-function updateScore() {
-    scoreVal.textContent = score;
-    streakVal.textContent = streak;
-}
+    function updateScore() {
+        scoreVal.textContent = score;
+        streakVal.textContent = streak;
+    }
 
-init();
-
-
+    init();
 </script>
-
-
 </body>
 </html>
