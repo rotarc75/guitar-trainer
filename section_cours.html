@@ -32,6 +32,51 @@
         .status.locked { background: rgba(0,0,0,0.3); color: #64748b; }
 
         .course-item.locked { opacity: 0.6; cursor: not-allowed; }
+
+        /* Style spécifique pour l'accordéon */
+        .course-item.accordion {
+        cursor: default; /* On ne clique pas sur toute la box, mais sur le header */
+        padding: 0; /* On gère le padding à l'intérieur */
+        display: block; /* Important pour que ça s'empile bien */
+        transition: all 0.3s ease;
+        }
+
+        .accordion-header {
+        padding: 25px;
+        cursor: pointer;
+        display: flex; justify-content: space-between; align-items: center;
+        }
+        .accordion-header:hover { background: rgba(255,255,255,0.02); }
+
+        .chevron {
+        font-size: 1.2rem; color: var(--primary); transition: transform 0.3s;
+        }
+
+        /* État ouvert : on tourne la flèche */
+        .course-item.open .chevron { transform: rotate(180deg); }
+        .course-item.open { border-color: var(--primary); background: rgba(30, 41, 59, 1); }
+
+        /* Le contenu caché */
+        .accordion-content {
+        max-height: 0; overflow: hidden;
+        transition: max-height 0.4s ease-out;
+        background: rgba(0, 0, 0, 0.2);
+        border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Les liens (sous-items) */
+        .sub-item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 15px 25px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        transition: background 0.2s;
+        }
+        .sub-item:last-child { border-bottom: none; }
+        .sub-item:hover { background: rgba(139, 92, 246, 0.1); }
+
+        .sub-title { color: #cbd5e1; font-weight: 500; }
+        .sub-item:hover .sub-title { color: white; }
     </style>
 </head>
 <body>
@@ -126,6 +171,27 @@
         </div>
 
     </div>
+
+
+
+<script>
+    function toggleAccordion(id) {
+        const element = document.getElementById(id);
+        const content = element.querySelector('.accordion-content');
+
+        // On bascule la classe 'open' pour le style (flèche qui tourne)
+        element.classList.toggle('open');
+
+        // On gère la hauteur pour l'animation
+        if (element.classList.contains('open')) {
+            // On ouvre : on définit la hauteur sur la hauteur réelle du contenu
+            content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+            // On ferme
+            content.style.maxHeight = null;
+        }
+    }
+</script>
 
 </body>
 </html>
