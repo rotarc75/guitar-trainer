@@ -3,366 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exo Rythme : Le Métronome Humain</title>
+    <title>Le Calibrateur</title>
     <style>
         :root {
-            --primary: #f59e0b; /* Orange pour le rythme */
-            --success: #10b981;
-            --danger: #ef4444;
-            --bg: #0f172a;
-            --text: #f1f5f9;
+            --primary: #f59e0b; /* Orange Rythme */
+            --bg-dark: #0f172a;
+            --text-main: #f1f5f9;
         }
 
         body {
-            font-family: 'Segoe UI', monospace, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; margin: 0; padding: 20px;
-            user-select: none; /* Empêche la sélection de texte en tapant */
+            height: 100vh; margin: 0;
+            user-select: none;
         }
 
-        .container {
-            background: rgba(30, 41, 59, 0.9);
-            padding: 40px; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center; max-width: 800px; width: 100%;
+        /* RETOUR */
+        .nav-back {
+            position: absolute; top: 20px; left: 20px;
+            text-decoration: none; color: #94a3b8; font-weight: 600;
+            padding: 8px 15px; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; transition: 0.2s;
+        }
+        .nav-back:hover { color: white; background: rgba(255,255,255,0.1); }
+
+        /* LE CŒUR DU SYSTÈME */
+        .beat-indicator {
+            width: 150px; height: 150px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 4px solid #334155;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; font-weight: bold; color: #64748b;
+            transition: transform 0.1s, border-color 0.1s, background 0.1s;
+            margin-bottom: 40px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        /* ANIMATIONS ET ÉTATS */
+        .beat-indicator.pulse { transform: scale(1.1); border-color: white; box-shadow: 0 0 50px rgba(255,255,255,0.2); }
+        .beat-indicator.perfect { border-color: #10b981; background: rgba(16, 185, 129, 0.2); color: #10b981; } /* Vert */
+        .beat-indicator.good { border-color: #3b82f6; background: rgba(59, 130, 246, 0.2); color: #3b82f6; } /* Bleu */
+        .beat-indicator.bad { border-color: #ef4444; background: rgba(239, 68, 68, 0.2); color: #ef4444; } /* Rouge */
+
+        /* CONTROLES */
+        .controls {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 20px 40px; border-radius: 20px;
+            display: flex; gap: 20px; align-items: center;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        h1 { color: var(--primary); margin-bottom: 10px; }
-
-        /* LA PISTE DE RYTHME */
-        .track-container {
-            position: relative;
-            width: 100%; height: 150px;
-            background: #1e293b;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid #334155;
-            margin: 30px 0;
+        input[type="number"] {
+            background: rgba(0,0,0,0.3); border: 1px solid #475569;
+            color: white; padding: 10px; border-radius: 8px;
+            font-size: 1.2rem; width: 80px; text-align: center;
         }
 
-        .cursor-line {
-            position: absolute; left: 100px; top: 0; bottom: 0;
-            width: 4px; background: white;
-            z-index: 10;
-            box-shadow: 0 0 10px white;
+        button {
+            background: var(--primary); color: white; border: none;
+            padding: 12px 30px; border-radius: 8px; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; transition: 0.2s;
+        }
+        button:hover { transform: scale(1.05); filter: brightness(1.1); }
+        button.stop { background: #ef4444; }
+
+        /* FEEDBACK TEXTE */
+        .feedback-text {
+            font-size: 1.5rem; height: 30px; margin-bottom: 10px; font-weight: bold;
+            text-align: center;
+        }
+        .offset-text {
+            font-family: monospace; color: #94a3b8; margin-bottom: 30px;
         }
 
-        .note-block {
-            position: absolute; top: 50px; height: 50px;
-            background: var(--primary);
-            border-radius: 5px;
-            opacity: 0.8;
-            border: 1px solid rgba(255,255,255,0.2);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: black; font-size: 0.8rem;
-        }
-
-        /* FEEDBACK VISUEL */
-        .feedback-display {
-            font-size: 2rem; font-weight: 900; height: 50px;
-            margin-bottom: 10px; text-transform: uppercase;
-        }
-
-        .score-board {
-            display: flex; justify-content: space-around;
-            margin-top: 20px; padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .stat-box { font-size: 1.2rem; }
-        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-
-        .btn {
-            background: var(--primary); color: black; border: none;
-            padding: 15px 40px; font-size: 1.2rem; font-weight: bold;
-            border-radius: 50px; cursor: pointer; margin-top: 20px;
-            transition: transform 0.1s;
-        }
-        .btn:active { transform: scale(0.95); }
-
-        /* Mode "Hit" pour l'animation */
-        .hit-perfect { color: var(--success); text-shadow: 0 0 20px var(--success); }
-        .hit-good { color: var(--primary); }
-        .hit-bad { color: var(--danger); }
-
-        /* Touche Espace visuelle */
-        .key-hint {
-            display: inline-block; padding: 5px 15px; border: 2px solid #64748b;
-            border-radius: 8px; color: #94a3b8; font-size: 0.9rem; margin-top: 10px;
-        }
-        .key-hint.active { background: white; color: black; border-color: white; }
+        .hint { margin-top: 30px; color: #64748b; font-size: 0.9rem; }
 
     </style>
 </head>
 <body>
 
-    <a href="../section_irythme.html" style="position:absolute; top:20px; left:20px; color:white; text-decoration:none;">← Retour</a>
+    <a href="../section_rythme.html" class="nav-back">← Retour</a>
 
-    <div class="container">
-        <h1>Le Batteur 🥁</h1>
-        <p>Écoute le métronome et tape <span class="key-hint" id="spaceKey">ESPACE</span> exactement sur le temps.</p>
+    <div class="feedback-text" id="feedbackMsg"></div>
+    <div class="offset-text" id="offsetMsg">En attente...</div>
 
-        <div class="feedback-display" id="feedback">PRÊT ?</div>
-
-        <div class="track-container" id="track">
-            <div class="cursor-line"></div>
-            <div id="notesContainer"></div>
-        </div>
-
-        <div class="score-board">
-            <div class="stat-box">Précision Moyenne<br><span class="stat-value" id="avgOffset">--</span> ms</div>
-            <div class="stat-box">Score<br><span class="stat-value" id="score">0</span> %</div>
-        </div>
-
-        <button class="btn" onclick="startLevel()">Lancer la séquence</button>
+    <div class="beat-indicator" id="beatCircle">
+        TAP
     </div>
 
+    <div class="controls">
+        <label>BPM :</label>
+        <input type="number" id="bpmInput" value="100" min="40" max="240">
+        <button id="startBtn" onclick="toggleMetronome()">Démarrer</button>
+    </div>
+
+    <div class="hint">Appuyez sur ESPACE pour taper le rythme</div>
+
 <script>
-    // --- CONFIGURATION ---
-    const TEMPO = 60; // BPM
-    const PIXELS_PER_SEC = 200; // Vitesse de défilement
-    const CURSOR_POS = 100; // Position X de la ligne blanche
-
-    // Séquence rythmique (1 = Noire, 2 = Blanche, 0.5 = Croche)
-    // C'est ici que tu pourras encoder les exos de ton livre
-    const rhythmSequence = [
-        1, 1, 1, 1,     // 4 Noires
-        2, 2,           // 2 Blanches
-        1, 1, 2,        // Noire Noire Blanche
-        0.5, 0.5, 1, 2  // Croche Croche Noire Blanche
-    ];
-
-    // --- VARIABLES GLOBALES ---
-    let audioCtx = null;
+    let audioCtx;
     let isRunning = false;
-    let startTime = 0;
-    let notes = []; // Objets notes avec position temporelle
-    let noteElements = []; // Les div HTML
-    let currentNoteIndex = 0;
-    let stats = { totalHits: 0, totalScore: 0, totalOffset: 0 };
+    let nextNoteTime = 0.0;
+    let timerID = null;
+    let bpm = 100;
 
-    // --- AUDIO ENGINE (Oscillateur simple pour le métronome) ---
-    function playClick() {
-        if(!audioCtx) return;
+    // Le coeur de la précision : AudioContext
+    const lookahead = 25.0; // On regarde 25ms devant
+    const scheduleAheadTime = 0.1; // On planifie 0.1s devant
+
+    let lastBeatTime = 0; // Pour calculer le décalage de la frappe
+
+    const circle = document.getElementById('beatCircle');
+    const startBtn = document.getElementById('startBtn');
+    const feedbackMsg = document.getElementById('feedbackMsg');
+    const offsetMsg = document.getElementById('offsetMsg');
+
+    function nextNote() {
+        const secondsPerBeat = 60.0 / bpm;
+        nextNoteTime += secondsPerBeat;
+        lastBeatTime = nextNoteTime; // On garde en mémoire le temps théorique
+    }
+
+    function scheduleNote(time) {
+        // 1. Le Son (Click court et précis)
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
+
+        osc.frequency.value = 1000; // Son aigu
+        gain.gain.value = 0.5;
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+
         osc.connect(gain);
         gain.connect(audioCtx.destination);
+        osc.start(time);
+        osc.stop(time + 0.05);
 
-        osc.frequency.value = 1000;
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.05);
-    }
-
-    function playHitSound(success) {
-        if(!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.frequency.value = success ? 600 : 200;
-        osc.type = success ? 'sine' : 'sawtooth';
-
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
-    }
-
-    // --- INITIALISATION ---
-    function initNotes() {
-        const container = document.getElementById('notesContainer');
-        container.innerHTML = '';
-        notes = [];
-        noteElements = [];
-
-        let currentTime = 4; // On commence à 4 secondes (temps de préparation)
-        const secondsPerBeat = 60 / TEMPO;
-
-        rhythmSequence.forEach((durationInBeats, index) => {
-            const durationSec = durationInBeats * secondsPerBeat;
-
-            // Création visuelle
-            const div = document.createElement('div');
-            div.className = 'note-block';
-            div.style.width = (durationSec * PIXELS_PER_SEC) - 2 + 'px'; // -2 pour la bordure
-            // On le place initialement très loin
-            container.appendChild(div);
-
-            notes.push({
-                expectedTime: currentTime,
-                duration: durationSec,
-                hit: false,
-                element: div,
-                type: durationInBeats === 1 ? 'Noire' : durationInBeats === 2 ? 'Blanche' : 'Croche'
-            });
-            noteElements.push(div);
-
-            div.innerText = notes[notes.length-1].type;
-
-            currentTime += durationSec;
-        });
-    }
-
-    // --- GAME LOOP ---
-    function startLevel() {
-        if(isRunning) return;
-
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        initNotes();
-
-        isRunning = true;
-        startTime = audioCtx.currentTime;
-        currentNoteIndex = 0;
-        stats = { totalHits: 0, totalScore: 0, totalOffset: 0 };
-        document.getElementById('score').innerText = "0";
-        document.getElementById('avgOffset').innerText = "--";
-        document.getElementById('feedback').innerText = "GO !";
-
-        requestAnimationFrame(update);
-    }
-
-    function update() {
-        if(!isRunning) return;
-
-        const now = audioCtx.currentTime;
-        const timeElapsed = now - startTime;
-
-        // Mise à jour de la position des notes
-        notes.forEach(note => {
-            // Position X = (Temps Cible - Temps Écoulé) * Vitesse + Position Curseur
-            // Quand Temps Cible == Temps Écoulé, la note est sous le curseur
-            const x = (note.expectedTime - timeElapsed) * PIXELS_PER_SEC + CURSOR_POS;
-            note.element.style.left = x + 'px';
-
-            // Gestion de l'échec (Note passée sans être tapée)
-            if (x < CURSOR_POS - 50 && !note.hit && !note.missed) {
-                note.missed = true;
-                displayFeedback("MISS", "hit-bad");
-                note.element.style.backgroundColor = "#ef4444";
-                updateStats(0, 100); // 100ms de pénalité arbitraire
-            }
-        });
-
-        // Fin du morceau
-        if (timeElapsed > notes[notes.length-1].expectedTime + 2) {
-            isRunning = false;
-            document.getElementById('feedback').innerText = "FINI !";
-        } else {
-            requestAnimationFrame(update);
-        }
-    }
-
-    // --- GESTION INPUT (CLAVIER) ---
-    document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
-            document.getElementById('spaceKey').classList.add('active');
-            if (isRunning) checkHit();
-        }
-    });
-
-    document.addEventListener('keyup', (e) => {
-        if (e.code === 'Space') {
-            document.getElementById('spaceKey').classList.remove('active');
-        }
-    });
-
-    function checkHit() {
-        const now = audioCtx.currentTime;
-        const timeElapsed = now - startTime;
-
-        // On cherche la note la plus proche qui n'a pas encore été jouée
-        // Fenêtre de tir : +/- 150ms
-        const hitWindow = 0.15;
-
-        let bestNote = null;
-        let minDiff = Infinity;
-
-        // On regarde les notes autour du moment présent
-        notes.forEach(note => {
-            if (!note.hit && !note.missed) {
-                const diff = Math.abs(note.expectedTime - timeElapsed);
-                if (diff < hitWindow && diff < minDiff) {
-                    minDiff = diff;
-                    bestNote = note;
-                }
-            }
-        });
-
-        if (bestNote) {
-            // BINGO !
-            bestNote.hit = true;
-            const diffMs = Math.round((timeElapsed - bestNote.expectedTime) * 1000); // positif = retard, négatif = avance
-            const absDiff = Math.abs(diffMs);
-
-            let score = 0;
-            let text = "";
-            let style = "";
-
-            if (absDiff < 40) {
-                text = "PARFAIT !";
-                style = "hit-perfect";
-                score = 100;
-                bestNote.element.style.background = "#10b981"; // Vert
-                playHitSound(true);
-            } else if (absDiff < 80) {
-                text = "BIEN";
-                style = "hit-good";
-                score = 70;
-                bestNote.element.style.background = "#3b82f6"; // Bleu
-                playHitSound(true);
-            } else {
-                text = "MOYEN";
-                style = "hit-bad";
-                score = 30;
-                bestNote.element.style.background = "#f59e0b"; // Orange
-                playHitSound(false);
-            }
-
-            // Affiche si on est en avance ou en retard
-            const timingText = diffMs > 0 ? `Retard (+${diffMs}ms)` : `Avance (${diffMs}ms)`;
-            displayFeedback(text, style);
-            console.log(timingText);
-
-            updateStats(score, absDiff);
-
-        } else {
-            // Taper dans le vide
-            // displayFeedback("...", "");
-        }
-    }
-
-    function displayFeedback(text, styleClass) {
-        const el = document.getElementById('feedback');
-        el.innerText = text;
-        el.className = "feedback-display " + styleClass;
-
-        // Reset l'animation
+        // 2. L'animation visuelle (synchro avec le son)
+        // On utilise setTimeout pour l'UI, calculé par rapport au temps AudioContext
+        const drawTime = (time - audioCtx.currentTime) * 1000;
         setTimeout(() => {
-            el.className = "feedback-display";
-        }, 300);
+            pulseCircle();
+        }, drawTime);
     }
 
-    function updateStats(score, offsetMs) {
-        stats.totalHits++;
-        stats.totalScore += score;
-        stats.totalOffset += offsetMs;
-
-        const avgOffset = Math.round(stats.totalOffset / stats.totalHits);
-        const finalScore = Math.round(stats.totalScore / stats.totalHits);
-
-        document.getElementById('avgOffset').innerText = avgOffset;
-        document.getElementById('score').innerText = finalScore;
+    function scheduler() {
+        // Tant qu'il y a des notes à jouer dans la fenêtre de temps
+        while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+            scheduleNote(nextNoteTime);
+            nextNote();
+        }
+        timerID = window.setTimeout(scheduler, lookahead);
     }
 
+    function toggleMetronome() {
+        if (isRunning) {
+            // STOP
+            window.clearTimeout(timerID);
+            isRunning = false;
+            startBtn.innerText = "Démarrer";
+            startBtn.classList.remove('stop');
+            offsetMsg.innerText = "Arrêté";
+            circle.className = "beat-indicator";
+        } else {
+            // START
+            bpm = parseInt(document.getElementById('bpmInput').value);
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            nextNoteTime = audioCtx.currentTime + 0.1;
+            isRunning = true;
+            startBtn.innerText = "Stop";
+            startBtn.classList.add('stop');
+            scheduler();
+            offsetMsg.innerText = "Écoutez le tempo...";
+        }
+    }
+
+    // --- ANIMATIONS ---
+    function pulseCircle() {
+        circle.classList.add('pulse');
+        setTimeout(() => circle.classList.remove('pulse'), 100);
+    }
+
+    function visualFeedback(quality) {
+        // quality: 'perfect', 'good', 'bad'
+        circle.className = "beat-indicator " + quality;
+        setTimeout(() => {
+            if(isRunning) circle.className = "beat-indicator";
+        }, 200);
+    }
+
+    // --- GESTION DU TAP (ESPACE) ---
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && isRunning) {
+            e.preventDefault(); // Empêcher le scroll
+            checkAccuracy();
+        }
+    });
+
+    function checkAccuracy() {
+        const currentTime = audioCtx.currentTime;
+        const secondsPerBeat = 60.0 / bpm;
+
+        // On cherche le temps du "Click" le plus proche
+        // Est-ce le click d'avant ? ou celui qui arrive ?
+
+        // Calcul mathématique pour trouver le "beat" théorique le plus proche
+        // On calcule combien de beats se sont écoulés depuis le début
+        // round() permet de trouver l'entier le plus proche (donc le beat le plus proche)
+        // Mais comme nextNoteTime avance, on peut utiliser lastBeatTime (le prochain click)
+        // et lastBeatTime - secondsPerBeat (le click d'avant).
+
+        // Option plus simple : Delta avec le "grid"
+        // Temps écoulé depuis le dernier "Start" théorique n'est pas fiable si on change le tempo.
+        // Utilisons la grille relative.
+
+        // Distance avec le prochain click
+        const distToNext = Math.abs(currentTime - nextNoteTime);
+        // Distance avec le click précédent (nextNoteTime - 1 beat)
+        const distToPrev = Math.abs(currentTime - (nextNoteTime - secondsPerBeat));
+
+        let diff = 0;
+        let isLate = false;
+
+        // On détermine si on est plus proche du précédent ou du suivant
+        if (distToPrev < distToNext) {
+            // On visait le click d'avant (donc on est en retard)
+            diff = distToPrev;
+            isLate = true;
+        } else {
+            // On vise le click qui arrive (donc on est en avance)
+            diff = distToNext;
+            isLate = false;
+        }
+
+        const diffMs = Math.round(diff * 1000);
+        const sign = isLate ? "+" : "-"; // + = Retard, - = Avance
+
+        // Affichage
+        offsetMsg.innerText = `${sign}${diffMs} ms`;
+
+        // Jugement
+        if (diffMs < 35) {
+            feedbackMsg.innerText = "PARFAIT !";
+            feedbackMsg.style.color = "#10b981";
+            visualFeedback('perfect');
+        } else if (diffMs < 70) {
+            feedbackMsg.innerText = "Bien";
+            feedbackMsg.style.color = "#3b82f6";
+            visualFeedback('good');
+        } else {
+            feedbackMsg.innerText = isLate ? "Trop Tard" : "Trop Tôt";
+            feedbackMsg.style.color = "#ef4444";
+            visualFeedback('bad');
+        }
+    }
 </script>
 </body>
 </html>
