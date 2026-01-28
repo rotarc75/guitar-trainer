@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maîtriser le Rythme</title>
+    <style>
+        :root {
+            /* Changement de couleur : Orange pour le Rythme */
+            --primary: #f59e0b;
+            --secondary: #1e293b;
+            --accent: #ef4444;
+            --bg-dark: #0f172a;
+            --text-main: #f1f5f9;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(at 0% 0%, hsla(30, 80%, 10%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(40, 70%, 20%, 1) 0, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeIn 1s ease-out;
+            position: relative;
+        }
+
+        /* Bouton retour */
+        .nav-back {
+            position: absolute;
+            left: 0;
+            top: 10px;
+            text-decoration: none;
+            color: #94a3b8;
+            font-weight: 600;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .nav-back:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            /* Dégradé Orange -> Rouge */
+            background: linear-gradient(to right, #f59e0b, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        /* GRILLE DES MODULES */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .module-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.3);
+            border-color: rgba(245, 158, 11, 0.5);
+        }
+
+        .module-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 3rem;
+            opacity: 0.1;
+        }
+
+        .module-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .module-desc {
+            color: #cbd5e1;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* BOUTON */
+        .action-group { margin-top: auto; }
+
+        .btn-practice {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 15px 0;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+            box-sizing: border-box;
+            /* Dégradé Orange */
+            background: linear-gradient(135deg, var(--primary) 0%, #ea580c 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+            border: none;
+        }
+
+        .btn-practice:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        /* Bouton "Bientôt" (Grisé) */
+        .btn-locked {
+            background: rgba(255, 255, 255, 0.05);
+            color: #64748b;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .btn-locked:hover { transform: none; filter: none; }
+
+        .badge-new {
+            position: absolute;
+            top: 20px; right: 20px;
+            background-color: #10b981; color: white;
+            font-size: 0.7rem; font-weight: bold;
+            padding: 4px 8px; border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="index.html" class="nav-back">← Retour</a>
+        <h1>Maîtriser le Rythme</h1>
+    </header>
+
+    <div class="modules-grid">
+
+        <div class="module-card">
+            <span class="badge-new">Nouveau</span>
+            <div class="module-badge">🥁</div>
+            <div class="module-title">
+                Le Batteur
+            </div>
+            <p class="module-desc">
+                Travaillez votre précision temporelle. Encodez les exercices de votre livre et vérifiez si vous tapez le rythme parfaitement (à la milliseconde près).
+            </p>
+            <div class="action-group">
+                <a href="section_rythme/exo_rythme_1.html" class="btn-practice">
+                    Lancer l'entraînement
+                </a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-badge">🎼</div>
+            <div class="module-title">
+                Lecture Rhythmique
+            </div>
+            <p class="module-desc">
+                Apprenez à déchiffrer instantanément les Noires, Blanches et Croches sans avoir besoin d'écouter l'audio avant.
+            </p>
+            <div class="action-group">
+                <a href="#" class="btn-practice btn-locked">
+                    Bientôt disponible
+                </a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-badge">👂</div>
+            <div class="module-title">
+                Dictée Rhythmique
+            </div>
+            <p class="module-desc">
+                J'écoute un rythme et je dois l'écrire. L'exercice ultime pour connecter l'oreille à la main.
+            </p>
+            <div class="action-group">
+                <a href="#" class="btn-practice btn-locked">
+                    Bientôt disponible
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exo Rythme : Le Métronome Humain</title>
+    <style>
+        :root {
+            --primary: #f59e0b; /* Orange pour le rythme */
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --text: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', monospace, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+            user-select: none; /* Empêche la sélection de texte en tapant */
+        }
+
+        .container {
+            background: rgba(30, 41, 59, 0.9);
+            padding: 40px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center; max-width: 800px; width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h1 { color: var(--primary); margin-bottom: 10px; }
+
+        /* LA PISTE DE RYTHME */
+        .track-container {
+            position: relative;
+            width: 100%; height: 150px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #334155;
+            margin: 30px 0;
+        }
+
+        .cursor-line {
+            position: absolute; left: 100px; top: 0; bottom: 0;
+            width: 4px; background: white;
+            z-index: 10;
+            box-shadow: 0 0 10px white;
+        }
+
+        .note-block {
+            position: absolute; top: 50px; height: 50px;
+            background: var(--primary);
+            border-radius: 5px;
+            opacity: 0.8;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: black; font-size: 0.8rem;
+        }
+
+        /* FEEDBACK VISUEL */
+        .feedback-display {
+            font-size: 2rem; font-weight: 900; height: 50px;
+            margin-bottom: 10px; text-transform: uppercase;
+        }
+
+        .score-board {
+            display: flex; justify-content: space-around;
+            margin-top: 20px; padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-box { font-size: 1.2rem; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+
+        .btn {
+            background: var(--primary); color: black; border: none;
+            padding: 15px 40px; font-size: 1.2rem; font-weight: bold;
+            border-radius: 50px; cursor: pointer; margin-top: 20px;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        /* Mode "Hit" pour l'animation */
+        .hit-perfect { color: var(--success); text-shadow: 0 0 20px var(--success); }
+        .hit-good { color: var(--primary); }
+        .hit-bad { color: var(--danger); }
+
+        /* Touche Espace visuelle */
+        .key-hint {
+            display: inline-block; padding: 5px 15px; border: 2px solid #64748b;
+            border-radius: 8px; color: #94a3b8; font-size: 0.9rem; margin-top: 10px;
+        }
+        .key-hint.active { background: white; color: black; border-color: white; }
+
+    </style>
+</head>
+<body>
+
+    <a href="../section_intervalles_accords.html" style="position:absolute; top:20px; left:20px; color:white; text-decoration:none;">← Retour</a>
+
+    <div class="container">
+        <h1>Le Batteur 🥁</h1>
+        <p>Écoute le métronome et tape <span class="key-hint" id="spaceKey">ESPACE</span> exactement sur le temps.</p>
+
+        <div class="feedback-display" id="feedback">PRÊT ?</div>
+
+        <div class="track-container" id="track">
+            <div class="cursor-line"></div>
+            <div id="notesContainer"></div>
+        </div>
+
+        <div class="score-board">
+            <div class="stat-box">Précision Moyenne<br><span class="stat-value" id="avgOffset">--</span> ms</div>
+            <div class="stat-box">Score<br><span class="stat-value" id="score">0</span> %</div>
+        </div>
+
+        <button class="btn" onclick="startLevel()">Lancer la séquence</button>
+    </div>
+
+<script>
+    // --- CONFIGURATION ---
+    const TEMPO = 60; // BPM
+    const PIXELS_PER_SEC = 200; // Vitesse de défilement
+    const CURSOR_POS = 100; // Position X de la ligne blanche
+
+    // Séquence rythmique (1 = Noire, 2 = Blanche, 0.5 = Croche)
+    // C'est ici que tu pourras encoder les exos de ton livre
+    const rhythmSequence = [
+        1, 1, 1, 1,     // 4 Noires
+        2, 2,           // 2 Blanches
+        1, 1, 2,        // Noire Noire Blanche
+        0.5, 0.5, 1, 2  // Croche Croche Noire Blanche
+    ];
+
+    // --- VARIABLES GLOBALES ---
+    let audioCtx = null;
+    let isRunning = false;
+    let startTime = 0;
+    let notes = []; // Objets notes avec position temporelle
+    let noteElements = []; // Les div HTML
+    let currentNoteIndex = 0;
+    let stats = { totalHits: 0, totalScore: 0, totalOffset: 0 };
+
+    // --- AUDIO ENGINE (Oscillateur simple pour le métronome) ---
+    function playClick() {
+        if(!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.frequency.value = 1000;
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+    }
+
+    function playHitSound(success) {
+        if(!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.frequency.value = success ? 600 : 200;
+        osc.type = success ? 'sine' : 'sawtooth';
+
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    // --- INITIALISATION ---
+    function initNotes() {
+        const container = document.getElementById('notesContainer');
+        container.innerHTML = '';
+        notes = [];
+        noteElements = [];
+
+        let currentTime = 4; // On commence à 4 secondes (temps de préparation)
+        const secondsPerBeat = 60 / TEMPO;
+
+        rhythmSequence.forEach((durationInBeats, index) => {
+            const durationSec = durationInBeats * secondsPerBeat;
+
+            // Création visuelle
+            const div = document.createElement('div');
+            div.className = 'note-block';
+            div.style.width = (durationSec * PIXELS_PER_SEC) - 2 + 'px'; // -2 pour la bordure
+            // On le place initialement très loin
+            container.appendChild(div);
+
+            notes.push({
+                expectedTime: currentTime,
+                duration: durationSec,
+                hit: false,
+                element: div,
+                type: durationInBeats === 1 ? 'Noire' : durationInBeats === 2 ? 'Blanche' : 'Croche'
+            });
+            noteElements.push(div);
+
+            div.innerText = notes[notes.length-1].type;
+
+            currentTime += durationSec;
+        });
+    }
+
+    // --- GAME LOOP ---
+    function startLevel() {
+        if(isRunning) return;
+
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        initNotes();
+
+        isRunning = true;
+        startTime = audioCtx.currentTime;
+        currentNoteIndex = 0;
+        stats = { totalHits: 0, totalScore: 0, totalOffset: 0 };
+        document.getElementById('score').innerText = "0";
+        document.getElementById('avgOffset').innerText = "--";
+        document.getElementById('feedback').innerText = "GO !";
+
+        requestAnimationFrame(update);
+    }
+
+    function update() {
+        if(!isRunning) return;
+
+        const now = audioCtx.currentTime;
+        const timeElapsed = now - startTime;
+
+        // Mise à jour de la position des notes
+        notes.forEach(note => {
+            // Position X = (Temps Cible - Temps Écoulé) * Vitesse + Position Curseur
+            // Quand Temps Cible == Temps Écoulé, la note est sous le curseur
+            const x = (note.expectedTime - timeElapsed) * PIXELS_PER_SEC + CURSOR_POS;
+            note.element.style.left = x + 'px';
+
+            // Gestion de l'échec (Note passée sans être tapée)
+            if (x < CURSOR_POS - 50 && !note.hit && !note.missed) {
+                note.missed = true;
+                displayFeedback("MISS", "hit-bad");
+                note.element.style.backgroundColor = "#ef4444";
+                updateStats(0, 100); // 100ms de pénalité arbitraire
+            }
+        });
+
+        // Fin du morceau
+        if (timeElapsed > notes[notes.length-1].expectedTime + 2) {
+            isRunning = false;
+            document.getElementById('feedback').innerText = "FINI !";
+        } else {
+            requestAnimationFrame(update);
+        }
+    }
+
+    // --- GESTION INPUT (CLAVIER) ---
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            document.getElementById('spaceKey').classList.add('active');
+            if (isRunning) checkHit();
+        }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if (e.code === 'Space') {
+            document.getElementById('spaceKey').classList.remove('active');
+        }
+    });
+
+    function checkHit() {
+        const now = audioCtx.currentTime;
+        const timeElapsed = now - startTime;
+
+        // On cherche la note la plus proche qui n'a pas encore été jouée
+        // Fenêtre de tir : +/- 150ms
+        const hitWindow = 0.15;
+
+        let bestNote = null;
+        let minDiff = Infinity;
+
+        // On regarde les notes autour du moment présent
+        notes.forEach(note => {
+            if (!note.hit && !note.missed) {
+                const diff = Math.abs(note.expectedTime - timeElapsed);
+                if (diff < hitWindow && diff < minDiff) {
+                    minDiff = diff;
+                    bestNote = note;
+                }
+            }
+        });
+
+        if (bestNote) {
+            // BINGO !
+            bestNote.hit = true;
+            const diffMs = Math.round((timeElapsed - bestNote.expectedTime) * 1000); // positif = retard, négatif = avance
+            const absDiff = Math.abs(diffMs);
+
+            let score = 0;
+            let text = "";
+            let style = "";
+
+            if (absDiff < 40) {
+                text = "PARFAIT !";
+                style = "hit-perfect";
+                score = 100;
+                bestNote.element.style.background = "#10b981"; // Vert
+                playHitSound(true);
+            } else if (absDiff < 80) {
+                text = "BIEN";
+                style = "hit-good";
+                score = 70;
+                bestNote.element.style.background = "#3b82f6"; // Bleu
+                playHitSound(true);
+            } else {
+                text = "MOYEN";
+                style = "hit-bad";
+                score = 30;
+                bestNote.element.style.background = "#f59e0b"; // Orange
+                playHitSound(false);
+            }
+
+            // Affiche si on est en avance ou en retard
+            const timingText = diffMs > 0 ? `Retard (+${diffMs}ms)` : `Avance (${diffMs}ms)`;
+            displayFeedback(text, style);
+            console.log(timingText);
+
+            updateStats(score, absDiff);
+
+        } else {
+            // Taper dans le vide
+            // displayFeedback("...", "");
+        }
+    }
+
+    function displayFeedback(text, styleClass) {
+        const el = document.getElementById('feedback');
+        el.innerText = text;
+        el.className = "feedback-display " + styleClass;
+
+        // Reset l'animation
+        setTimeout(() => {
+            el.className = "feedback-display";
+        }, 300);
+    }
+
+    function updateStats(score, offsetMs) {
+        stats.totalHits++;
+        stats.totalScore += score;
+        stats.totalOffset += offsetMs;
+
+        const avgOffset = Math.round(stats.totalOffset / stats.totalHits);
+        const finalScore = Math.round(stats.totalScore / stats.totalHits);
+
+        document.getElementById('avgOffset').innerText = avgOffset;
+        document.getElementById('score').innerText = finalScore;
+    }
+
+</script>
+</body>
+</html>
